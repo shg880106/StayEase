@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using StayEaseApp.Application.Interfaces;
 using StayEaseApp.Infrastructure.Persistence;
+using StayEaseApp.Infrastructure.Repositories;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +20,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("StayEaseApp")));
-
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 
 var app = builder.Build();
 

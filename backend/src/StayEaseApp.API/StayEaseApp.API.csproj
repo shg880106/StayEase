@@ -20,4 +20,8 @@
     <ProjectReference Include="..\StayEaseApp.Infrastructure\StayEaseApp.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>
