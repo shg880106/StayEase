@@ -15,6 +15,7 @@ public class Property
     public decimal PricePerNight { get; set; }
     public required string Location { get; set; }
     public int MaxGuests { get; set; }
+    public string? ImageUrl { get; set; }
 
     // Navigation properties
     public User Owner { get; set; } = null!;
@@ -23,7 +24,7 @@ public class Property
 
     private Property() { }
 
-    public Property(string title, string description, decimal pricePerNight, string location, int maxGuests, Guid ownerID)
+    public Property(string title, string description, decimal pricePerNight, string location, int maxGuests, string imageUrl, Guid ownerID)
     {
         PropertyID = Guid.NewGuid();
         Title = title;
@@ -31,6 +32,7 @@ public class Property
         PricePerNight = pricePerNight;
         Location = location;
         MaxGuests = maxGuests;
+        ImageUrl = imageUrl;
         OwnerID = ownerID;
     }
 }
