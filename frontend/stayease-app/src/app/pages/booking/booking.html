@@ -1,0 +1,225 @@
+<!-- Page Header -->
+<div class="bg-white border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <h1 class="text-3xl font-bold text-gray-900 mb-1">Available Properties</h1>
+    <p class="text-gray-500 text-sm">Select a property to start your booking.</p>
+  </div>
+</div>
+
+<!-- Properties Grid -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+  @if (propertiesError()) {
+    <div class="mb-6 flex items-start gap-3 bg-red-50 border border-red-100 text-red-700 text-sm rounded-xl px-4 py-3">
+      <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span>{{ propertiesError() }}</span>
+    </div>
+  }
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    @for (property of properties(); track property.propertyID) {
+      <div
+        class="bg-white rounded-2xl overflow-hidden border transition-all cursor-pointer hover:shadow-lg"
+        [class.border-rose-400]="selectedProperty()?.propertyID === property.propertyID"
+        [class.border-gray-100]="selectedProperty()?.propertyID !== property.propertyID"
+        [class.shadow-lg]="selectedProperty()?.propertyID === property.propertyID"
+        [class.ring-2]="selectedProperty()?.propertyID === property.propertyID"
+        [class.ring-rose-300]="selectedProperty()?.propertyID === property.propertyID"
+        (click)="selectProperty(property)">
+
+        <!-- Property Image -->
+        <div class="relative h-44 overflow-hidden">
+          <img
+            [src]="property.imageUrl"
+            [alt]="property.title"
+            class="w-full h-full object-cover transition-transform hover:scale-105 duration-300"/>
+          @if (selectedProperty()?.propertyID === property.propertyID) {
+            <div class="absolute top-3 right-3 bg-rose-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+              Selected
+            </div>
+          }
+        </div>
+
+        <!-- Property Details -->
+        <div class="p-4">
+          <h3 class="font-semibold text-gray-900 text-sm mb-1 truncate">{{ property.title }}</h3>
+          <div class="flex items-center gap-1 text-gray-400 text-xs mb-2">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+            </svg>
+            {{ property.location }}
+          </div>
+          <p class="text-gray-500 text-xs leading-relaxed line-clamp-3 min-h-[3.75rem] mb-3">{{ property.description }}</p>
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-rose-500 font-bold text-base">${{ property.pricePerNight }}</span>
+              <span class="text-gray-400 text-xs"> / night</span>
+            </div>
+            <span class="text-xs text-gray-400 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/>
+              </svg>
+              {{ property.maxGuests }} guests
+            </span>
+          </div>
+          <button
+            class="mt-3 w-full text-center text-xs font-semibold py-2 rounded-lg transition-colors"
+            [class.bg-rose-500]="selectedProperty()?.propertyID === property.propertyID"
+            [class.text-white]="selectedProperty()?.propertyID === property.propertyID"
+            [class.hover:bg-rose-600]="selectedProperty()?.propertyID === property.propertyID"
+            [class.bg-gray-100]="selectedProperty()?.propertyID !== property.propertyID"
+            [class.text-gray-700]="selectedProperty()?.propertyID !== property.propertyID"
+            [class.hover:bg-gray-200]="selectedProperty()?.propertyID !== property.propertyID"
+            (click)="selectProperty(property); $event.stopPropagation()">
+            {{ selectedProperty()?.propertyID === property.propertyID ? '✓ Selected' : 'Book Now' }}
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Booking Form (appears when a property is selected) -->
+@if (selectedProperty()) {
+  <div #formSection class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <div class="max-w-xl mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+
+      <!-- Form header -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl overflow-hidden shrink-0">
+          <img [src]="selectedProperty()!.imageUrl" [alt]="selectedProperty()!.title" class="w-full h-full object-cover"/>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-gray-900">Book {{ selectedProperty()!.title }}</h2>
+          <p class="text-xs text-gray-400">{{ selectedProperty()!.location }}</p>
+        </div>
+      </div>
+
+      <!-- Success Message -->
+      @if (bookingResult()) {
+        <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-5 text-center">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <h3 class="font-semibold text-green-800 mb-1">Booking Confirmed!</h3>
+          <p class="text-green-700 text-sm mb-1">
+            Booking ID: <code class="font-mono text-xs bg-green-100 px-1 rounded">{{ bookingResult()!.bookingID }}</code>
+          </p>
+          <p class="text-green-700 text-sm font-semibold">
+            Total: ${{ bookingResult()!.totalPrice | number: '1.2-2' }}
+          </p>
+        </div>
+      }
+
+      <!-- Error Message -->
+      @if (bookingError()) {
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+          <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-red-700 text-sm">{{ bookingError() }}</p>
+        </div>
+      }
+
+      <!-- Form -->
+      <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- User ID -->
+        <div class="mb-5">
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">
+            User ID <span class="text-rose-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="userID"
+            placeholder="e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            class="w-full border rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-300 outline-none transition-colors font-mono"
+            [class.border-gray-200]="!bookingForm.get('userID')?.touched || !bookingForm.get('userID')?.invalid"
+            [class.focus:border-rose-400]="!bookingForm.get('userID')?.invalid"
+            [class.border-red-400]="bookingForm.get('userID')?.touched && bookingForm.get('userID')?.invalid"
+            [class.bg-red-50]="bookingForm.get('userID')?.touched && bookingForm.get('userID')?.invalid"/>
+          @if (userIDErrors) {
+            <p class="mt-1.5 text-xs text-red-500">{{ userIDErrors }}</p>
+          }
+        </div>
+
+        <!-- Dates Row -->
+        <div class="grid grid-cols-2 gap-4 mb-5">
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+              Check-in <span class="text-rose-500">*</span>
+            </label>
+            <input
+              type="date"
+              formControlName="startDate"
+              [min]="today"
+              class="w-full border rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none transition-colors"
+              [class.border-gray-200]="!bookingForm.get('startDate')?.touched || !bookingForm.get('startDate')?.invalid"
+              [class.border-red-400]="bookingForm.get('startDate')?.touched && bookingForm.get('startDate')?.invalid"
+              [class.bg-red-50]="bookingForm.get('startDate')?.touched && bookingForm.get('startDate')?.invalid"/>
+            @if (bookingForm.get('startDate')?.touched && bookingForm.get('startDate')?.hasError('required')) {
+              <p class="mt-1.5 text-xs text-red-500">Check-in date is required.</p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+              Check-out <span class="text-rose-500">*</span>
+            </label>
+            <input
+              type="date"
+              formControlName="endDate"
+              [min]="today"
+              class="w-full border rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none transition-colors"
+              [class.border-gray-200]="!bookingForm.get('endDate')?.touched || !bookingForm.get('endDate')?.invalid"
+              [class.border-red-400]="bookingForm.get('endDate')?.touched && bookingForm.get('endDate')?.invalid"
+              [class.bg-red-50]="bookingForm.get('endDate')?.touched && bookingForm.get('endDate')?.invalid"/>
+            @if (bookingForm.get('endDate')?.touched && bookingForm.get('endDate')?.hasError('required')) {
+              <p class="mt-1.5 text-xs text-red-500">Check-out date is required.</p>
+            }
+          </div>
+        </div>
+
+        @if (bookingForm.errors?.['dateRange'] && bookingForm.get('endDate')?.touched) {
+          <p class="mb-4 text-xs text-red-500">Check-out must be after check-in.</p>
+        }
+
+        <!-- Price Summary -->
+        @if (nights > 0) {
+          <div class="mb-5 bg-gray-50 rounded-xl p-4 text-sm">
+            <div class="flex justify-between text-gray-600 mb-1">
+              <span>${{ selectedProperty()!.pricePerNight }} × {{ nights }} night{{ nights !== 1 ? 's' : '' }}</span>
+              <span>${{ estimatedTotal }}</span>
+            </div>
+            <div class="flex justify-between font-semibold text-gray-900 border-t border-gray-200 pt-2 mt-2">
+              <span>Estimated total</span>
+              <span class="text-rose-500">${{ estimatedTotal }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          [disabled]="isLoading()"
+          class="w-full bg-rose-500 hover:bg-rose-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+          @if (isLoading()) {
+            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            Creating booking...
+          } @else {
+            Confirm Booking
+          }
+        </button>
+
+      </form>
+    </div>
+  </div>
+}
