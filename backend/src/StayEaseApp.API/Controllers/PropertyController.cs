@@ -16,7 +16,7 @@ public class PropertyController : ControllerBase
     }
 
     /// <summary>
-    /// Get a list with all properties
+    /// Get a list with all properties.
     /// </summary>
     /// <returns>
     /// Returns one of the following HTTP status codes:
