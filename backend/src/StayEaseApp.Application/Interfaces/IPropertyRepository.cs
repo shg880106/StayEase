@@ -9,4 +9,5 @@ namespace StayEaseApp.Application.Interfaces;
 public interface IPropertyRepository
 {
     Task<Property?> GetByIdAsync(Guid propertyId);
+    Task<List<Property>> GetPropertiesAsync();
 }

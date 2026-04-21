@@ -23,4 +23,9 @@ public class PropertyRepository : IPropertyRepository
         return await _dbContext.Properties
             .FirstOrDefaultAsync(p => p.PropertyID == propertyId);
     }
+
+    public async Task<List<Property>> GetPropertiesAsync()
+    {
+        return await _dbContext.Properties.ToListAsync();
+    }
 }

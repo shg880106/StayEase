@@ -39,6 +39,7 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(buil
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 builder.Services.AddScoped<BookingService>();
+builder.Services.AddScoped<PropertyService>();
 
 var app = builder.Build();
 
