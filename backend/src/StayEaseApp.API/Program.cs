@@ -35,7 +35,9 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod());
 });
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("StayEaseApp")));
+var connectionString = builder.Configuration.GetConnectionString("StayEaseApp");
+
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 builder.Services.AddScoped<BookingService>();
@@ -44,11 +46,9 @@ builder.Services.AddScoped<PropertyService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(); 
-}
+app.UseSwagger();
+app.UseSwaggerUI(); 
+
 
 app.UseCors("AllowAngular");
 
