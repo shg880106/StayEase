@@ -30,14 +30,20 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",
         policy => policy
-            .WithOrigins("http://localhost:4200")
+            .WithOrigins(
+                "http://localhost:4200",
+                "https://stayease-webapp-shg-gjdve9gcghgwbqc7.westeurope-01.azurewebsites.net"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
 
+// Use SQL Server connection string from appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("StayEaseApp");
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AppDbContext>(options => 
+    options.UseSqlServer(connectionString));
+
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 builder.Services.AddScoped<BookingService>();
@@ -47,8 +53,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
-app.UseSwaggerUI(); 
-
+app.UseSwaggerUI();
 
 app.UseCors("AllowAngular");
 
