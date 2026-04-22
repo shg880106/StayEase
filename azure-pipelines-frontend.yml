@@ -1,0 +1,76 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - frontend/*
+
+pool:
+  name: 'Default'
+
+variables:
+  angularProjectPath: 'frontend/stayease-app'
+  buildConfiguration: 'production'
+  staticWebAppUrl: 'https://salmon-water-06fe6a403.7.azurestaticapps.net'
+
+stages:
+- stage: Build
+  displayName: 'Build Angular App'
+  jobs:
+  - job: Build
+    displayName: 'Build job'
+    steps:
+    - task: NodeTool@0
+      displayName: 'Install Node.js'
+      inputs:
+        versionSpec: '22.x'
+    
+    - script: |
+        cd $(angularProjectPath)
+        npm install
+      displayName: 'npm install'
+    
+    - script: |
+        cd $(angularProjectPath)
+        npm run build -- --configuration=$(buildConfiguration)
+      displayName: 'npm build'
+    
+    - powershell: |
+        Write-Host "=== Checking build output folder structure ==="
+        Get-ChildItem "$(angularProjectPath)/dist" -Recurse | Select-Object FullName
+      displayName: 'Debug: List dist contents'
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: frontend'
+      inputs:
+        PathtoPublish: '$(angularProjectPath)/dist/stayease-app/browser'
+        ArtifactName: 'frontend-drop'
+
+- stage: Deploy
+  displayName: 'Deploy to Azure Static Web Apps'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeployFrontend
+    displayName: 'Deploy Angular App'
+    environment: 'production-frontend'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - powershell: |
+              npm install -g @azure/static-web-apps-cli
+            displayName: 'Install SWA CLI'
+          
+          - powershell: |
+              Write-Host "=== Listing contents being deployed ==="
+              Get-ChildItem -Path "$(Pipeline.Workspace)/frontend-drop" -Recurse | Select-Object FullName
+              Write-Host "=== Starting deployment ==="
+              swa deploy "$(Pipeline.Workspace)/frontend-drop" --deployment-token $(StaticWebAppToken) --env production
+            displayName: 'Deploy to Static Web App'
