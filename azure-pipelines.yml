@@ -4,12 +4,12 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-branches:
-  include:
-  - main
-paths:
-  include:
-  - backend/*
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - backend/*
 
 pool:
   name: 'Default'
