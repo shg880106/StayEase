@@ -32,7 +32,8 @@ builder.Services.AddCors(options =>
         policy => policy
             .WithOrigins(
                 "http://localhost:4200",
-                "https://stayease-webapp-shg-gjdve9gcghgwbqc7.westeurope-01.azurewebsites.net"
+                "https://stayease-webapp-shg-gjdve9gcghgwbqc7.westeurope-01.azurewebsites.net",
+                "https://salmon-water-06fe6a403.7.azurestaticapps.net"
             )
             .AllowAnyHeader()
             .AllowAnyMethod());
