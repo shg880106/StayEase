@@ -10,10 +10,10 @@ public class Property
 {   
     public Guid PropertyID { get; set; }
     public Guid OwnerID { get; set; }
-    public required string Title { get; set; }
-    public required string Description { get; set; }
+    public string Title { get; private set; }
+    public string Description { get; private set; }
     public decimal PricePerNight { get; set; }
-    public required string Location { get; set; }
+    public string Location { get; private set; }
     public int MaxGuests { get; set; }
     public string? ImageUrl { get; set; }
 
