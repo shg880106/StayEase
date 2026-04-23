@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using StayEaseApp.Domain.Entities;
+using StayEaseApp.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,4 +107,73 @@ public class BookingTests
 
         overlaps.Should().BeFalse();
     }
+
+    [Fact]
+    public void Should_Throw_Exception_When_StartDate_Is_After_EndDate()
+    {
+        // Act
+        Action act = () => CreateBooking(
+            new DateTime(2026, 1, 15),
+            new DateTime(2026, 1, 10));
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("Invalid date range");
+    }
+
+    [Fact]
+    public void Should_Throw_Exception_When_StartDate_Equals_EndDate()
+    {
+        // Act
+        Action act = () => CreateBooking(
+            new DateTime(2026, 1, 10),
+            new DateTime(2026, 1, 10));
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("Invalid date range");
+    }
+
+    [Fact]
+    public void Should_Calculate_TotalPrice_Correctly()
+    {
+        // Arrange
+        var pricePerNight = 150m;
+
+        // Act
+        var booking = new Booking(
+            _propertyId,
+            _userId,
+            new DateTime(2026, 1, 10),
+            new DateTime(2026, 1, 15),
+            pricePerNight);
+
+        // Assert
+        booking.TotalPrice.Should().Be(750m); // 5 nights * 150
+    }
+
+    [Fact]
+    public void Should_Set_Default_Status_To_Pending()
+    {
+        // Act
+        var booking = CreateBooking(
+            new DateTime(2026, 1, 10),
+            new DateTime(2026, 1, 15));
+
+        // Assert
+        booking.BookingStatus.Should().Be(Status.Pending);
+    }
+
+    [Fact]
+public void Should_Generate_Unique_BookingID()
+{
+    // Act
+    var booking1 = CreateBooking(new DateTime(2026, 1, 10), new DateTime(2026, 1, 15));
+    var booking2 = CreateBooking(new DateTime(2026, 2, 10), new DateTime(2026, 2, 15));
+
+    // Assert
+    booking1.BookingID.Should().NotBe(Guid.Empty);
+    booking2.BookingID.Should().NotBe(Guid.Empty);
+    booking1.BookingID.Should().NotBe(booking2.BookingID);
+}
 }
