@@ -1,5 +1,6 @@
 ﻿using StayEaseApp.Application.DTOs;
 using StayEaseApp.Application.Interfaces;
+using StayEaseApp.Application.Mappers;
 using StayEaseApp.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ public class BookingService : IBookingService
 {
     private readonly IBookingRepository _bookingRepository;
     private readonly IPropertyRepository _propertyRepository;
+    private readonly BookingMapper _mapper = new();
 
     public BookingService(IBookingRepository bookingRepository, IPropertyRepository propertyRepository)
     {
@@ -39,16 +41,7 @@ public class BookingService : IBookingService
         // 4. Save booking
         await _bookingRepository.AddAsync(booking);
 
-        // Map to DTO
-        return new BookingResponseDto
-        {
-            BookingID = booking.BookingID,
-            PropertyID = booking.PropertyID,
-            UserID = booking.UserID,
-            StartDate = booking.StartDate,
-            EndDate = booking.EndDate,
-            TotalPrice = booking.TotalPrice,
-            BookingStatus = booking.BookingStatus
-        };
+        // Map to DTO        
+        return _mapper.BookingToBookingResponseDto(booking);
     }
 }
