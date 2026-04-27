@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StayEaseApp.Application.DTOs;
+using StayEaseApp.Application.Interfaces;
 using StayEaseApp.Application.Services;
 
 namespace StayEaseApp.API.Controllers;
@@ -8,9 +9,9 @@ namespace StayEaseApp.API.Controllers;
 [Route("api/[controller]")]
 public class BookingController : ControllerBase
 {
-    private readonly BookingService _bookingService;
+    private readonly IBookingService _bookingService;
 
-    public BookingController(BookingService bookingService)
+    public BookingController(IBookingService bookingService)
     {
         _bookingService = bookingService;
     }

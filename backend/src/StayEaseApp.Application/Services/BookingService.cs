@@ -1,4 +1,5 @@
-﻿using StayEaseApp.Application.Interfaces;
+﻿using StayEaseApp.Application.DTOs;
+using StayEaseApp.Application.Interfaces;
 using StayEaseApp.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace StayEaseApp.Application.Services;
-public class BookingService
+public class BookingService : IBookingService
 {
     private readonly IBookingRepository _bookingRepository;
     private readonly IPropertyRepository _propertyRepository;
@@ -18,7 +19,7 @@ public class BookingService
         _propertyRepository = propertyRepository;
     }
 
-    public async Task<Booking> CreateBookingAsync(Guid propertyId, Guid userId, DateTime startDate, DateTime endDate)
+    public async Task<BookingResponseDto> CreateBookingAsync(Guid propertyId, Guid userId, DateTime startDate, DateTime endDate)
     {
         // 1. Get property (needed for price)
         var property = await _propertyRepository.GetByIdAsync(propertyId);
@@ -38,6 +39,16 @@ public class BookingService
         // 4. Save booking
         await _bookingRepository.AddAsync(booking);
 
-        return booking;
+        // Map to DTO
+        return new BookingResponseDto
+        {
+            BookingID = booking.BookingID,
+            PropertyID = booking.PropertyID,
+            UserID = booking.UserID,
+            StartDate = booking.StartDate,
+            EndDate = booking.EndDate,
+            TotalPrice = booking.TotalPrice,
+            BookingStatus = booking.BookingStatus
+        };
     }
 }

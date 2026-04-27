@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace StayEaseApp.Application.Services;
-public class PropertyService
+public class PropertyService : IPropertyService
 {
     private readonly IPropertyRepository _propertyRepository;
 

@@ -45,10 +45,13 @@ var connectionString = builder.Configuration.GetConnectionString("StayEaseApp");
 builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseSqlServer(connectionString));
 
+// Register Repositories
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
-builder.Services.AddScoped<BookingService>();
-builder.Services.AddScoped<PropertyService>();
+
+// Register Services with their interfaces
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IPropertyService, PropertyService>();
 
 var app = builder.Build();
 

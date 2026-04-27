@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StayEaseApp.Application.DTOs;
+using StayEaseApp.Application.Interfaces;
 using StayEaseApp.Application.Services;
 
 namespace StayEaseApp.API.Controllers;
@@ -8,15 +9,15 @@ namespace StayEaseApp.API.Controllers;
 [Route("api/[controller]")]
 public class PropertyController : ControllerBase
 {
-    private readonly PropertyService _propertyService;
+    private readonly IPropertyService _propertyService;
 
-    public PropertyController(PropertyService propertyService)
+    public PropertyController(IPropertyService propertyService)
     {
         _propertyService = propertyService;
     }
 
     /// <summary>
-    /// Get a list with all properties.
+    /// Get a list with all properties
     /// </summary>
     /// <returns>
     /// Returns one of the following HTTP status codes:
