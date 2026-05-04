@@ -25,4 +25,11 @@ public class PropertyService : IPropertyService
 
         return properties.Select(p => _mapper.PropertyToPropertyResponseDto(p)).ToList();
     }
+
+    public async Task<PropertyResponseDto?> GetPropertyByIdAsync(Guid propertyId)
+    {
+        var property = await _propertyRepository.GetByIdAsync(propertyId);
+
+        return property == null ? null : _mapper.PropertyToPropertyResponseDto(property);
+    }
 }
