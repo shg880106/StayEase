@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular",
         policy => policy
             .WithOrigins(
-                "http://localhost:4200",
+                "http://localhost:4200", "http://localhost:5141",
                 "https://stayease-webapp-shg-gjdve9gcghgwbqc7.westeurope-01.azurewebsites.net",
                 "https://salmon-water-06fe6a403.7.azurestaticapps.net"
             )

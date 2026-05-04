@@ -22,6 +22,7 @@ public class PropertyRepository : IPropertyRepository
     public async Task<Property?> GetByIdAsync(Guid propertyId)
     {
         return await _dbContext.Properties
+            .AsNoTracking()
             .FirstOrDefaultAsync(p => p.PropertyID == propertyId);
     }
 

@@ -156,4 +156,31 @@ public class PropertyController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    /// <summary>
+    /// Get a list with all properties that match the provided search filters
+    /// </summary>
+    /// <param name="filters">The search filters to apply when retrieving properties</param>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>200 Ok - Properties retrieved successfully</description></item>
+    ///   <item><description>400 Bad Request - Invalid input data or property validation failed</description></item>
+    /// </list>
+    /// </returns>
+    [HttpGet("search/filter")]
+    [ProducesResponseType(typeof(List<PropertyResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetProperties([FromQuery] PropertySearchFiltersDto filters)
+    {
+        try
+        {
+            var properties = await _propertyService.GetPropertiesSearchFiltersAsync(filters);
+            return Ok(properties);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

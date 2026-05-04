@@ -79,4 +79,33 @@ public class PropertyService : IPropertyService
 
         return _mapper.PropertyToPropertyResponseDto(property);
     }
+
+    public async Task<List<PropertyResponseDto>> GetPropertiesSearchFiltersAsync(PropertySearchFiltersDto filters)
+    {
+        var properties = await _propertyRepository.GetPropertiesAsync();
+
+        // Apply filters
+        if (!string.IsNullOrEmpty(filters.Location))
+        {
+            properties = properties.Where(p => p.Location.Contains(filters.Location, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+        if (filters.MinPrice.HasValue)
+        {
+            properties = properties.Where(p => p.PricePerNight >= filters.MinPrice.Value).ToList();
+        }
+        if (filters.MaxPrice.HasValue)
+        {
+            properties = properties.Where(p => p.PricePerNight <= filters.MaxPrice.Value).ToList();
+        }
+        if (filters.MinGuests.HasValue)
+        {
+            properties = properties.Where(p => p.MaxGuests >= filters.MinGuests.Value).ToList();
+        }
+        if (filters.MaxGuests.HasValue)
+        {
+            properties = properties.Where(p => p.MaxGuests <= filters.MaxGuests.Value).ToList();
+        }
+
+        return properties.Select(p => _mapper.PropertyToPropertyResponseDto(p)).ToList();
+    }
 }
