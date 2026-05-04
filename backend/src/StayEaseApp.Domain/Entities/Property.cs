@@ -10,10 +10,10 @@ public class Property
 {   
     public Guid PropertyID { get; set; }
     public Guid OwnerID { get; set; }
-    public string Title { get; private set; }
-    public string Description { get; private set; }
+    public string Title { get; set; } 
+    public string Description { get; set; } 
     public decimal PricePerNight { get; set; }
-    public string Location { get; private set; }
+    public string Location { get; set; } 
     public int MaxGuests { get; set; }
     public string? ImageUrl { get; set; }
 
@@ -22,7 +22,7 @@ public class Property
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
-    private Property() { }
+    public Property() { }
 
     public Property(string title, string description, decimal pricePerNight, string location, int maxGuests, string imageUrl, Guid ownerID)
     {

@@ -72,5 +72,30 @@ public class PropertyController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Create a new property with the provided details
+    /// </summary>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>201 Created - Property created successfully</description></item>
+    ///   <item><description>400 Bad Request - Invalid input data or property validation failed</description></item>
+    /// </list>
+    /// </returns>
+    [HttpPost]
+    [ProducesResponseType(typeof(PropertyResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateProperty([FromBody] CreatePropertyRequestDto propertyRequest)
+    {
+        try
+        {
+            var createdProperty = await _propertyService.CreatePropertyAsync(propertyRequest);
 
+            return CreatedAtAction(nameof(GetPropertyById), new { propertyId = createdProperty.PropertyID }, createdProperty);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

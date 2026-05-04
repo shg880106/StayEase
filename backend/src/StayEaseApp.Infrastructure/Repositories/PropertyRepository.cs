@@ -28,4 +28,11 @@ public class PropertyRepository : IPropertyRepository
     {
         return await _dbContext.Properties.ToListAsync();
     }
+
+    public async Task<Property> CreatePropertyAsync(Property property)
+    {
+        _dbContext.Properties.Add(property);
+        await _dbContext.SaveChangesAsync();
+        return property;
+    }
 }

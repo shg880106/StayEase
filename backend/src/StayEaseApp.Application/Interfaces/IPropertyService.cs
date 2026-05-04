@@ -10,4 +10,5 @@ public interface IPropertyService
 {
     Task<List<PropertyResponseDto>> GetPropertiesAsync();
     Task<PropertyResponseDto?> GetPropertyByIdAsync(Guid propertyId);
+    Task<PropertyResponseDto> CreatePropertyAsync(CreatePropertyRequestDto propertyRequest);
 }

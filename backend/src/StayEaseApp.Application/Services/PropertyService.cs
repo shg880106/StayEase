@@ -19,6 +19,7 @@ public class PropertyService : IPropertyService
         _propertyRepository = propertyRepository;
     }
 
+
     public async Task<List<PropertyResponseDto>> GetPropertiesAsync()
     {
         var properties = await _propertyRepository.GetPropertiesAsync();
@@ -31,5 +32,22 @@ public class PropertyService : IPropertyService
         var property = await _propertyRepository.GetByIdAsync(propertyId);
 
         return property == null ? null : _mapper.PropertyToPropertyResponseDto(property);
+    }
+    public async Task<PropertyResponseDto> CreatePropertyAsync(CreatePropertyRequestDto propertyRequest)
+    {
+        var newProperty = new Property
+        {
+            PropertyID = Guid.NewGuid(),
+            OwnerID = propertyRequest.OwnerID,
+            Title = propertyRequest.Title,
+            Description = propertyRequest.Description,
+            PricePerNight = propertyRequest.PricePerNight,
+            Location = propertyRequest.Location,
+            MaxGuests = propertyRequest.MaxGuests,
+            ImageUrl = propertyRequest.ImageUrl
+        };
+
+        var createdProperty = await _propertyRepository.CreatePropertyAsync(newProperty);
+        return _mapper.PropertyToPropertyResponseDto(createdProperty);
     }
 }
