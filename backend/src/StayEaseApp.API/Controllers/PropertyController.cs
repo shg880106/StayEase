@@ -130,4 +130,30 @@ public class PropertyController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    /// <summary>
+    /// Update a property with the provided details
+    /// </summary>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>200 Ok - Property updated successfully</description></item>
+    ///   <item><description>400 Bad Request - Invalid input data or property validation failed</description></item>
+    /// </list>
+    /// </returns>
+    [HttpPut("{propertyId}")]
+    [ProducesResponseType(typeof(PropertyResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateProperty(Guid propertyId, [FromBody] UpdatePropertyRequestDto propertyRequest)
+    {
+        try
+        {
+            var updatedProperty = await _propertyService.UpdatePropertyAsync(propertyId, propertyRequest);
+            return Ok(updatedProperty);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

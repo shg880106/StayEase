@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using StayEaseApp.Application.DTOs;
 using StayEaseApp.Application.Interfaces;
 using StayEaseApp.Domain.Entities;
 using StayEaseApp.Infrastructure.Persistence;
@@ -49,5 +50,12 @@ public class PropertyRepository : IPropertyRepository
             throw new Exception($"Property with ID {propertyId} not found.");
 
         }
+    }
+
+    public async Task<Property> UpdatePropertyAsync(Guid propertyId, Property propertyRequest)
+    {
+        _dbContext.Properties.Update(propertyRequest);
+        await _dbContext.SaveChangesAsync();
+        return propertyRequest;
     }
 }

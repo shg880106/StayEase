@@ -60,4 +60,23 @@ public class PropertyService : IPropertyService
         }
         await _propertyRepository.DeletePropertyAsync(propertyId);
     }
+
+    public async Task<PropertyResponseDto> UpdatePropertyAsync(Guid propertyId, UpdatePropertyRequestDto propertyRequest)
+    {
+        var property = await _propertyRepository.GetByIdAsync(propertyId);
+        if (property == null)
+        {
+            throw new Exception($"Property with ID {propertyId} not found.");
+        }
+        property.Title = propertyRequest.Title;
+        property.Description = propertyRequest.Description;
+        property.PricePerNight = propertyRequest.PricePerNight;
+        property.Location = propertyRequest.Location;
+        property.MaxGuests = propertyRequest.MaxGuests;
+        property.ImageUrl = propertyRequest.ImageUrl;
+
+        await _propertyRepository.UpdatePropertyAsync(propertyId, property);
+
+        return _mapper.PropertyToPropertyResponseDto(property);
+    }
 }

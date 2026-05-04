@@ -12,4 +12,5 @@ public interface IPropertyRepository
     Task<List<Property>> GetPropertiesAsync();
     Task<Property> CreatePropertyAsync(Property property);
     Task DeletePropertyAsync(Guid propertyId);
+    Task<Property> UpdatePropertyAsync(Guid propertyId, Property propertyRequest);
 }
