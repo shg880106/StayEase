@@ -50,4 +50,14 @@ public class PropertyService : IPropertyService
         var createdProperty = await _propertyRepository.CreatePropertyAsync(newProperty);
         return _mapper.PropertyToPropertyResponseDto(createdProperty);
     }
+
+    public async Task DeletePropertyAsync(Guid propertyId)
+    {
+        var property = await _propertyRepository.GetByIdAsync(propertyId);
+        if (property == null)
+        {
+            throw new Exception($"Property with ID {propertyId} not found.");
+        }
+        await _propertyRepository.DeletePropertyAsync(propertyId);
+    }
 }

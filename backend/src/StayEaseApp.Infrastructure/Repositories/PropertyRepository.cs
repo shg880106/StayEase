@@ -35,4 +35,19 @@ public class PropertyRepository : IPropertyRepository
         await _dbContext.SaveChangesAsync();
         return property;
     }
+
+    public async Task DeletePropertyAsync(Guid propertyId)
+    {
+        var property = await _dbContext.Properties.FindAsync(propertyId);
+        if (property != null)
+        {
+            _dbContext.Properties.Remove(property);
+            await _dbContext.SaveChangesAsync();
+        }
+        else
+        {
+            throw new Exception($"Property with ID {propertyId} not found.");
+
+        }
+    }
 }
