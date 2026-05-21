@@ -42,6 +42,8 @@ public class AuthService : IAuthService
             PasswordHash = passwordHash
         };
 
+        user.CreatedAt = DateTime.UtcNow;
+
         // Save to database
         await _userRepository.CreateAsync(user);
 
