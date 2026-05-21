@@ -9,6 +9,16 @@ export interface Property {
   imageUrl: string;
 }
 
+export interface CreatePropertyRequest {
+  ownerID: string;
+  title: string;
+  description: string;
+  pricePerNight: number;
+  location: string;
+  maxGuests: number;
+  imageUrl: string;
+}
+
 export interface PropertySearchFilters {
   location: string;
   minGuests: number | null;

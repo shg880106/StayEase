@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Property, PropertySearchFilters } from '../models/property.model';
+import { Property, PropertySearchFilters, CreatePropertyRequest } from '../models/property.model';
 import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -22,4 +22,13 @@ export class PropertyService {
     if (filters.maxGuests != null) params = params.set('maxGuests', filters.maxGuests.toString());
     return this.http.get<Property[]>(`${this.apiUrl}/search/filter`, { params });
   }
+
+  getMyProperties(): Observable<Property[]> {
+    return this.http.get<Property[]>(`${this.apiUrl}/my-properties`);
+  }
+
+  create(request: CreatePropertyRequest): Observable<Property> {
+    return this.http.post<Property>(this.apiUrl, request);
+  }
+  
 }
