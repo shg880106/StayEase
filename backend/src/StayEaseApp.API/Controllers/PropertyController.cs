@@ -218,4 +218,41 @@ public class PropertyController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Get all properties owned by the authenticated user
+    /// </summary>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>200 Ok - List of properties owned by the user in response body</description></item>
+    ///   <item><description>400 Bad Request - Invalid input data or property validation failed</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated</description></item>
+    /// </list>
+    /// </returns>
+    [Authorize]
+    [HttpGet("my-properties")]
+    [ProducesResponseType(typeof(List<PropertyResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetMyProperties()
+    {
+        try
+        {
+            // Extract UserID from JWT token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            var properties = await _propertyService.GetPropertiesByOwnerIdAsync(userId);
+            return Ok(properties);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

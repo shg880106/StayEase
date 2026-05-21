@@ -108,4 +108,10 @@ public class PropertyService : IPropertyService
 
         return properties.Select(p => _mapper.PropertyToPropertyResponseDto(p)).ToList();
     }
+
+    public async Task<List<PropertyResponseDto>> GetPropertiesByOwnerIdAsync(Guid ownerId)
+    {
+        var properties = await _propertyRepository.GetPropertiesByOwnerIdAsync(ownerId);
+        return properties.Select(p => _mapper.PropertyToPropertyResponseDto(p)).ToList();
+    }
 }

@@ -59,4 +59,12 @@ public class PropertyRepository : IPropertyRepository
         await _dbContext.SaveChangesAsync();
         return propertyRequest;
     }
+
+    public async Task<List<Property>> GetPropertiesByOwnerIdAsync(Guid ownerId)
+    {
+        return await _dbContext.Properties
+            .AsNoTracking()
+            .Where(p => p.OwnerID == ownerId)
+            .ToListAsync();
+    }
 }
