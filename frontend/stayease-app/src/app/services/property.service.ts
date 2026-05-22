@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Property, PropertySearchFilters, CreatePropertyRequest } from '../models/property.model';
+import { Property, PropertySearchFilters, CreatePropertyRequest, UpdatePropertyRequest } from '../models/property.model';
 import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +29,14 @@ export class PropertyService {
 
   create(request: CreatePropertyRequest): Observable<Property> {
     return this.http.post<Property>(this.apiUrl, request);
+  }
+
+  update(id: string, request: UpdatePropertyRequest): Observable<Property> {
+    return this.http.put<Property>(`${this.apiUrl}/${id}`, request);
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
   
 }

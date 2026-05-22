@@ -21,7 +21,26 @@ export class MyPropertiesComponent implements OnInit {
   readonly submitting = signal(false);
   readonly submitError = signal<string | null>(null);
 
+  readonly showEditModal = signal(false);
+  readonly editingProperty = signal<Property | null>(null);
+  readonly editSubmitting = signal(false);
+  readonly editSubmitError = signal<string | null>(null);
+  readonly deletingId = signal<string | null>(null);
+
+  readonly showDeleteConfirm = signal(false);
+  readonly pendingDeleteId = signal<string | null>(null);
+  readonly deleteSuccessTitle = signal<string | null>(null);
+
   readonly createForm = this.fb.group({
+    title: ['', Validators.required],
+    description: ['', Validators.required],
+    location: ['', Validators.required],
+    pricePerNight: [null as number | null, [Validators.required, Validators.min(1)]],
+    maxGuests: [null as number | null, [Validators.required, Validators.min(1)]],
+    imageUrl: [''],
+  });
+
+  readonly editForm = this.fb.group({
     title: ['', Validators.required],
     description: ['', Validators.required],
     location: ['', Validators.required],
@@ -42,6 +61,104 @@ export class MyPropertiesComponent implements OnInit {
 
   closeModal(): void {
     this.showModal.set(false);
+  }
+
+  openEditModal(property: Property): void {
+    this.editingProperty.set(property);
+    this.editForm.setValue({
+      title: property.title,
+      description: property.description,
+      location: property.location,
+      pricePerNight: property.pricePerNight,
+      maxGuests: property.maxGuests,
+      imageUrl: property.imageUrl ?? '',
+    });
+    this.editSubmitError.set(null);
+    this.showEditModal.set(true);
+  }
+
+  closeEditModal(): void {
+    this.showEditModal.set(false);
+    this.editingProperty.set(null);
+  }
+
+  hasEditChanges(): boolean {
+    const property = this.editingProperty();
+    if (!property) return false;
+    const val = this.editForm.getRawValue();
+    return (
+      val.title !== property.title ||
+      val.description !== property.description ||
+      val.location !== property.location ||
+      val.pricePerNight !== property.pricePerNight ||
+      val.maxGuests !== property.maxGuests ||
+      (val.imageUrl ?? '') !== (property.imageUrl ?? '')
+    );
+  }
+
+  submitUpdate(): void {
+    const property = this.editingProperty();
+    if (this.editForm.invalid || this.editSubmitting() || !property) return;
+
+    const val = this.editForm.getRawValue();
+
+    this.editSubmitting.set(true);
+    this.editSubmitError.set(null);
+
+    this.propertyService.update(property.propertyID, {
+      title: val.title!,
+      description: val.description!,
+      location: val.location!,
+      pricePerNight: val.pricePerNight!,
+      maxGuests: val.maxGuests!,
+      imageUrl: val.imageUrl ?? '',
+    }).subscribe({
+      next: (updated) => {
+        this.properties.update(list =>
+          list.map(p => p.propertyID === updated.propertyID ? updated : p)
+        );
+        this.editSubmitting.set(false);
+        this.showEditModal.set(false);
+        this.editingProperty.set(null);
+      },
+      error: () => {
+        this.editSubmitError.set('Failed to update property. Please try again.');
+        this.editSubmitting.set(false);
+      },
+    });
+  }
+
+  askDeleteProperty(propertyId: string): void {
+    this.pendingDeleteId.set(propertyId);
+    this.showDeleteConfirm.set(true);
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirm.set(false);
+    this.pendingDeleteId.set(null);
+  }
+
+  confirmDelete(): void {
+    const propertyId = this.pendingDeleteId();
+    if (!propertyId || this.deletingId()) return;
+
+    const title = this.properties().find(p => p.propertyID === propertyId)?.title ?? 'Property';
+    this.showDeleteConfirm.set(false);
+    this.deletingId.set(propertyId);
+
+    this.propertyService.delete(propertyId).subscribe({
+      next: () => {
+        this.properties.update(list => list.filter(p => p.propertyID !== propertyId));
+        this.deletingId.set(null);
+        this.pendingDeleteId.set(null);
+        this.deleteSuccessTitle.set(title);
+        setTimeout(() => this.deleteSuccessTitle.set(null), 3000);
+      },
+      error: () => {
+        this.deletingId.set(null);
+        this.pendingDeleteId.set(null);
+      },
+    });
   }
 
   submitCreate(): void {
