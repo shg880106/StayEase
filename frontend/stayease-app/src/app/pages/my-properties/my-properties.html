@@ -1,0 +1,450 @@
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+    <!-- Header -->
+    <div class="mb-10 flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-extrabold text-gray-900">My Properties</h1>
+        <p class="text-gray-500 mt-1 text-sm">Manage the properties you own on StayEase.</p>
+      </div>
+      <button
+        (click)="openModal()"
+        class="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm shadow-rose-200">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+        </svg>
+        Add Property
+      </button>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="flex justify-center items-center py-24">
+        <svg class="animate-spin w-8 h-8 text-rose-500" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+        </svg>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (!loading() && error()) {
+      <div class="bg-red-50 border border-red-200 text-red-700 rounded-2xl px-6 py-5 text-sm">
+        {{ error() }}
+      </div>
+    }
+
+    <!-- Empty state -->
+    @if (!loading() && !error() && properties().length === 0) {
+      <div class="flex flex-col items-center justify-center py-28 text-center">
+        <div class="w-16 h-16 bg-rose-100 rounded-2xl flex items-center justify-center mb-5">
+          <svg class="w-8 h-8 text-rose-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+        </div>
+        <h2 class="text-lg font-semibold text-gray-900 mb-1">No properties yet</h2>
+        <p class="text-gray-500 text-sm max-w-xs mb-6">You have not listed any properties. Add your first one!</p>
+        <button
+          (click)="openModal()"
+          class="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+          </svg>
+          Add Property
+        </button>
+      </div>
+    }
+
+    <!-- Properties grid -->
+    @if (!loading() && !error() && properties().length > 0) {
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (property of properties(); track property.propertyID) {
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+
+            <!-- Image -->
+            <div class="h-48 bg-gray-100 overflow-hidden">
+              @if (property.imageUrl) {
+                <img [src]="property.imageUrl" [alt]="property.title"
+                     class="w-full h-full object-cover"/>
+              } @else {
+                <div class="w-full h-full flex items-center justify-center">
+                  <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18M3.75 4.5h16.5A.75.75 0 0121 5.25v10.5a.75.75 0 01-.75.75H3.75A.75.75 0 013 15.75V5.25a.75.75 0 01.75-.75z"/>
+                  </svg>
+                </div>
+              }
+            </div>
+
+            <!-- Card body -->
+            <div class="p-5 flex flex-col flex-1">
+              <h3 class="font-semibold text-gray-900 text-base truncate mb-1">{{ property.title }}</h3>
+
+              <div class="flex items-center gap-1 text-gray-400 text-xs mb-2">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+                </svg>
+                <span class="truncate">{{ property.location }}</span>
+              </div>
+
+              <p class="text-gray-500 text-xs line-clamp-2 mb-4">{{ property.description }}</p>
+
+              <div class="mt-auto flex items-center justify-between">
+                <div>
+                  <span class="text-rose-500 font-bold text-base">${{ property.pricePerNight }}</span>
+                  <span class="text-gray-400 text-xs"> / night</span>
+                </div>
+                <span class="flex items-center gap-1 text-gray-400 text-xs">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+                  </svg>
+                  {{ property.maxGuests }} guests
+                </span>
+              </div>
+
+              <!-- Action buttons -->
+              <div class="mt-4 flex items-center gap-2 pt-3 border-t border-gray-100">
+                <button
+                  (click)="openEditModal(property)"
+                  title="Update property"
+                  class="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 hover:border-blue-300 rounded-xl px-3 py-2 transition-colors">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125"/>
+                  </svg>
+                  Update
+                </button>
+                <button
+                  (click)="askDeleteProperty(property.propertyID)"
+                  [disabled]="deletingId() === property.propertyID"
+                  title="Delete property"
+                  class="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium text-red-500 hover:text-red-600 hover:bg-red-50 border border-red-200 hover:border-red-300 rounded-xl px-3 py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  @if (deletingId() === property.propertyID) {
+                    <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                    </svg>
+                  } @else {
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                    </svg>
+                    Delete
+                  }
+                </button>
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- Create Property Modal -->
+@if (showModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeModal()"></div>
+
+    <!-- Panel -->
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+
+      <!-- Modal header -->
+      <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+        <h2 class="text-lg font-bold text-gray-900">Add a Property</h2>
+        <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="px-6 py-5 space-y-4">
+
+        <!-- Title -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Title <span class="text-rose-500">*</span></label>
+          <input
+            formControlName="title"
+            type="text"
+            placeholder="Cozy mountain cabin"
+            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent transition"/>
+          @if (createForm.get('title')?.invalid && createForm.get('title')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Title is required.</p>
+          }
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Description <span class="text-rose-500">*</span></label>
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Describe your property…"
+            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent transition resize-none"></textarea>
+          @if (createForm.get('description')?.invalid && createForm.get('description')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Description is required.</p>
+          }
+        </div>
+
+        <!-- Location -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Location <span class="text-rose-500">*</span></label>
+          <input
+            formControlName="location"
+            type="text"
+            placeholder="Barcelona, Spain"
+            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent transition"/>
+          @if (createForm.get('location')?.invalid && createForm.get('location')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Location is required.</p>
+          }
+        </div>
+
+        <!-- Price & Guests (side by side) -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Price / Night ($) <span class="text-rose-500">*</span></label>
+            <input
+              formControlName="pricePerNight"
+              type="number"
+              min="1"
+              placeholder="120"
+              class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent transition"/>
+            @if (createForm.get('pricePerNight')?.invalid && createForm.get('pricePerNight')?.touched) {
+              <p class="text-xs text-red-500 mt-1">Enter a valid price.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Max Guests <span class="text-rose-500">*</span></label>
+            <input
+              formControlName="maxGuests"
+              type="number"
+              min="1"
+              placeholder="4"
+              class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent transition"/>
+            @if (createForm.get('maxGuests')?.invalid && createForm.get('maxGuests')?.touched) {
+              <p class="text-xs text-red-500 mt-1">Enter a valid number.</p>
+            }
+          </div>
+        </div>
+
+        <!-- Image URL -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Image URL <span class="text-gray-400 font-normal">(optional)</span></label>
+          <input
+            formControlName="imageUrl"
+            type="url"
+            placeholder="https://example.com/photo.jpg"
+            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-transparent transition"/>
+        </div>
+
+        <!-- Submit error -->
+        @if (submitError()) {
+          <div class="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-xs">
+            {{ submitError() }}
+          </div>
+        }
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-3 pt-1">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="createForm.invalid || submitting()"
+            class="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+            @if (submitting()) {
+              <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+              </svg>
+            }
+            Create Property
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteConfirm()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="cancelDelete()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-900 text-base">Delete property?</h3>
+          <p class="text-gray-500 text-sm mt-0.5">This action cannot be undone.</p>
+        </div>
+      </div>
+      <div class="flex gap-3 justify-end">
+        <button
+          (click)="cancelDelete()"
+          class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+          Cancel
+        </button>
+        <button
+          (click)="confirmDelete()"
+          class="px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors">
+          Yes, delete
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete Success Toast -->
+@if (deleteSuccessTitle()) {
+  <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-gray-900 text-white text-sm font-medium px-5 py-3 rounded-2xl shadow-lg">
+    <svg class="w-4 h-4 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+    </svg>
+    <span>"{{ deleteSuccessTitle() }}" was deleted successfully.</span>
+  </div>
+}
+
+<!-- Edit Property Modal -->
+@if (showEditModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeEditModal()"></div>
+
+    <!-- Panel -->
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+
+      <!-- Modal header -->
+      <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+        <h2 class="text-lg font-bold text-gray-900">Update Property</h2>
+        <button (click)="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="editForm" (ngSubmit)="submitUpdate()" class="px-6 py-5 space-y-4">
+
+        <!-- Title -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Title <span class="text-rose-500">*</span></label>
+          <input
+            formControlName="title"
+            type="text"
+            placeholder="Cozy mountain cabin"
+            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"/>
+          @if (editForm.get('title')?.invalid && editForm.get('title')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Title is required.</p>
+          }
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Description <span class="text-rose-500">*</span></label>
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Describe your property…"
+            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition resize-none"></textarea>
+          @if (editForm.get('description')?.invalid && editForm.get('description')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Description is required.</p>
+          }
+        </div>
+
+        <!-- Location -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Location <span class="text-rose-500">*</span></label>
+          <input
+            formControlName="location"
+            type="text"
+            placeholder="Barcelona, Spain"
+            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"/>
+          @if (editForm.get('location')?.invalid && editForm.get('location')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Location is required.</p>
+          }
+        </div>
+
+        <!-- Price & Guests (side by side) -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Price / Night ($) <span class="text-rose-500">*</span></label>
+            <input
+              formControlName="pricePerNight"
+              type="number"
+              min="1"
+              placeholder="120"
+              class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"/>
+            @if (editForm.get('pricePerNight')?.invalid && editForm.get('pricePerNight')?.touched) {
+              <p class="text-xs text-red-500 mt-1">Enter a valid price.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Max Guests <span class="text-rose-500">*</span></label>
+            <input
+              formControlName="maxGuests"
+              type="number"
+              min="1"
+              placeholder="4"
+              class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"/>
+            @if (editForm.get('maxGuests')?.invalid && editForm.get('maxGuests')?.touched) {
+              <p class="text-xs text-red-500 mt-1">Enter a valid number.</p>
+            }
+          </div>
+        </div>
+
+        <!-- Image URL -->
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Image URL <span class="text-gray-400 font-normal">(optional)</span></label>
+          <input
+            formControlName="imageUrl"
+            type="url"
+            placeholder="https://example.com/photo.jpg"
+            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition"/>
+        </div>
+
+        <!-- Submit error -->
+        @if (editSubmitError()) {
+          <div class="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-xs">
+            {{ editSubmitError() }}
+          </div>
+        }
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-3 pt-1">
+          <button
+            type="button"
+            (click)="closeEditModal()"
+            class="px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="editForm.invalid || editSubmitting() || !hasEditChanges()"
+            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+            @if (editSubmitting()) {
+              <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+              </svg>
+            }
+            Save Changes
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}

@@ -10,13 +10,6 @@ export interface BookingResponse {
   totalPrice: number;
 }
 
-export interface Property {
-  propertyID: string;
-  userID: string;
-  title: string;
-  description: string;
-  pricePerNight: number;
-  location: string;
-  maxGuests: number;
-  imageUrl: string;
-}
+
+
+

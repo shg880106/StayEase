@@ -9,7 +9,9 @@ import {
 } from '@angular/forms';
 import { BookingService } from '../../services/booking.service';
 import { PropertyService } from '../../services/property.service';
-import { Property, BookingResponse } from '../../models/booking.model';
+import { BookingResponse } from '../../models/booking.model';
+import { Property, PropertySearchFilters } from '../../models/property.model';
+import { BookingPropertySearchComponent } from '../../components/booking/booking-property-search';
 
 const GUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -30,7 +32,7 @@ function dateRangeValidator(control: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-booking',
-  imports: [ReactiveFormsModule, DecimalPipe],
+  imports: [ReactiveFormsModule, DecimalPipe, BookingPropertySearchComponent],
   templateUrl: './booking.html',
 })
 export class BookingComponent implements OnInit {
@@ -41,7 +43,9 @@ export class BookingComponent implements OnInit {
   private propertyService = inject(PropertyService);
 
   properties = signal<Property[]>([]);
+  filteredProperties = signal<Property[]>([]);
   propertiesError = signal<string | null>(null);
+  isSearching = signal(false);
   selectedProperty = signal<Property | null>(null);
   bookingResult = signal<BookingResponse | null>(null);
   bookingError = signal<string | null>(null);
@@ -60,7 +64,10 @@ export class BookingComponent implements OnInit {
 
   ngOnInit(): void {
     this.propertyService.getAll().subscribe({
-      next: (data) => this.properties.set(data),
+      next: (data) => {
+        this.properties.set(data);
+        this.filteredProperties.set(data);
+      },
       error: () => this.propertiesError.set('Failed to load properties. Please try again later.'),
     });
   }
@@ -71,6 +78,30 @@ export class BookingComponent implements OnInit {
     if (ctrl.errors?.['required']) return 'User ID is required.';
     if (ctrl.errors?.['invalidGuid']) return 'Must be a valid UUID (e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6).';
     return null;
+  }
+
+  onFiltersApplied(filters: PropertySearchFilters): void {
+    const hasFilters = !!(filters.location || filters.minGuests || filters.maxGuests || filters.minPrice || filters.maxPrice);
+
+    if (!hasFilters) {
+      this.filteredProperties.set(this.properties());
+      this.propertiesError.set(null);
+      return;
+    }
+
+    this.isSearching.set(true);
+    this.propertiesError.set(null);
+
+    this.propertyService.search(filters).subscribe({
+      next: (data) => {
+        this.filteredProperties.set(data);
+        this.isSearching.set(false);
+      },
+      error: () => {
+        this.propertiesError.set('Failed to search properties. Please try again.');
+        this.isSearching.set(false);
+      },
+    });
   }
 
   selectProperty(property: Property): void {

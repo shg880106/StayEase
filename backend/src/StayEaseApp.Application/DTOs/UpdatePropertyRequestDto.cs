@@ -5,10 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace StayEaseApp.Application.DTOs;
-public class PropertyResponseDto
+public class UpdatePropertyRequestDto
 {
-    public Guid PropertyID { get; set; }
-    public Guid OwnerID { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal PricePerNight { get; set; }

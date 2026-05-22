@@ -6,8 +6,18 @@
   </div>
 </div>
 
-<!-- Properties Grid -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<!-- Main content: sidebar + grid -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex gap-8 items-start">
+
+  <!-- Filter Sidebar -->
+  <aside class="w-64 shrink-0 sticky top-6">
+    <app-booking-property-search
+      [properties]="properties()"
+      (filtersApplied)="onFiltersApplied($event)"/>
+  </aside>
+
+  <!-- Properties Grid -->
+  <div class="flex-1 min-w-0">
 
   @if (propertiesError()) {
     <div class="mb-6 flex items-start gap-3 bg-red-50 border border-red-100 text-red-700 text-sm rounded-xl px-4 py-3">
@@ -18,8 +28,31 @@
     </div>
   }
 
-  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    @for (property of properties(); track property.propertyID) {
+  <!-- Results count / searching indicator -->
+  @if (!propertiesError()) {
+    <div class="mb-5 h-5">
+      @if (isSearching()) {
+        <span class="inline-flex items-center gap-2 text-sm text-gray-400">
+          <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+          Searching...
+        </span>
+      } @else {
+        <p class="text-sm text-gray-500">
+          @if (filteredProperties().length === properties().length) {
+            {{ properties().length }} propert{{ properties().length !== 1 ? 'ies' : 'y' }} available
+          } @else {
+            {{ filteredProperties().length }} of {{ properties().length }} propert{{ properties().length !== 1 ? 'ies' : 'y' }} match your filters
+          }
+        </p>
+      }
+    </div>
+  }
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    @for (property of filteredProperties(); track property.propertyID) {
       <div
         class="bg-white rounded-2xl overflow-hidden border transition-all cursor-pointer hover:shadow-lg"
         [class.border-rose-400]="selectedProperty()?.propertyID === property.propertyID"
@@ -78,8 +111,22 @@
         </div>
       </div>
     }
+    @empty {
+      @if (!propertiesError()) {
+        <div class="col-span-full flex flex-col items-center justify-center py-16 text-center">
+          <div class="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <p class="text-gray-500 font-medium text-sm mb-1">No properties match your filters</p>
+          <p class="text-gray-400 text-xs">Try adjusting or clearing the filters to see more results.</p>
+        </div>
+      }
+    }
   </div>
-</div>
+  </div><!-- end flex-1 -->
+</div><!-- end flex wrapper -->
 
 <!-- Booking Form (appears when a property is selected) -->
 @if (selectedProperty()) {
