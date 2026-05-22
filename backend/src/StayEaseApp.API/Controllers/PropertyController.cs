@@ -167,22 +167,47 @@ public class PropertyController : ControllerBase
     }
 
     /// <summary>
-    /// Update a property with the provided details
+    /// Update a property (requires authentication)
     /// </summary>
     /// <returns>
     /// Returns one of the following HTTP status codes:
     /// <list type="bullet">
     ///   <item><description>200 Ok - Property updated successfully</description></item>
     ///   <item><description>400 Bad Request - Invalid input data or property validation failed</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated</description></item>
+    ///   <item><description>403 Forbidden - User does not own this property</description></item>
+    ///   <item><description>404 Not Found - Property not found</description></item>
     /// </list>
     /// </returns>
+    [Authorize]
     [HttpPut("{propertyId}")]
     [ProducesResponseType(typeof(PropertyResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProperty(Guid propertyId, [FromBody] UpdatePropertyRequestDto propertyRequest)
     {
         try
         {
+            var property = await _propertyService.GetPropertyByIdAsync(propertyId);
+            if (property == null)
+            {
+                return NotFound(new { message = $"Property with ID {propertyId} not found." });
+            }
+
+            // Verify the authenticated user owns the property
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            if (property.OwnerID != userId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = "You do not have permission to update this property. Only the property owner can update it." });
+            }
+
             var updatedProperty = await _propertyService.UpdatePropertyAsync(propertyId, propertyRequest);
             return Ok(updatedProperty);
         }
