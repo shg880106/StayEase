@@ -44,4 +44,46 @@ public class BookingService : IBookingService
         // Map to DTO        
         return _mapper.BookingToBookingResponseDto(booking);
     }
+
+    public async Task<BookingDetailsDto?> GetBookingDetailsAsync(Guid bookingId, Guid userId)
+    {
+        var booking = await _bookingRepository.GetByIdAsync(bookingId);
+
+        if (booking == null)
+            return null;
+
+        // Ensure the booking belongs to the requesting user
+        if (booking.UserID != userId)
+            throw new UnauthorizedAccessException("You don't have permission to view this booking");
+
+        // Map to detailed DTO
+        return new BookingDetailsDto
+        {
+            BookingID = booking.BookingID,
+            StartDate = booking.StartDate,
+            EndDate = booking.EndDate,
+            TotalPrice = booking.TotalPrice,
+            BookingStatus = booking.BookingStatus,
+            Property = new PropertyDetailsDto
+            {
+                PropertyID = booking.Property.PropertyID,
+                Title = booking.Property.Title,
+                Location = booking.Property.Location,
+                Description = booking.Property.Description,
+                PricePerNight = booking.Property.PricePerNight,
+                ImageUrl = booking.Property.ImageUrl
+            },
+            Owner = new OwnerDetailsDto
+            {
+                Name = booking.Property.Owner.Name,
+                Email = booking.Property.Owner.Email
+            }
+        };
+    }
+
+    public async Task<List<BookingResponseDto>> GetUserBookingsAsync(Guid userId)
+    {
+        var bookings = await _bookingRepository.GetByUserIdAsync(userId);
+        return bookings.Select(b => _mapper.BookingToBookingResponseDto(b)).ToList();
+    }
 }

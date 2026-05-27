@@ -24,10 +24,27 @@ public class BookingRepository : IBookingRepository
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task<Booking?> GetByIdAsync(Guid bookingId)
+    {
+        return await _dbContext.Bookings
+            .Include(b => b.Property)
+                .ThenInclude(p => p.Owner)
+            .FirstOrDefaultAsync(b => b.BookingID == bookingId);
+    }
+
     public async Task<List<Booking>> GetByPropertyIdAsync(Guid propertyId)
     {
         return await _dbContext.Bookings
             .Where(b => b.PropertyID == propertyId)
+            .ToListAsync();
+    }
+
+    public async Task<List<Booking>> GetByUserIdAsync(Guid userId)
+    {
+        return await _dbContext.Bookings
+            .Include(b => b.Property)
+            .Where(b => b.UserID == userId)
+            .OrderByDescending(b => b.StartDate)
             .ToListAsync();
     }
 }

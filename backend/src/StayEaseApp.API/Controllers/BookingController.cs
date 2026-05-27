@@ -50,23 +50,99 @@ public class BookingController : ControllerBase
             }
 
             // Create booking with authenticated user's ID
-            var booking = await _bookingService.CreateBookingAsync(
+            var response = await _bookingService.CreateBookingAsync(
                 request.PropertyID,
-                userId,  // Use UserID from JWT token
+                userId,  
                 request.StartDate,
                 request.EndDate); 
-
-            var response = new BookingResponseDto
-            {
-                BookingID = booking.BookingID,
-                TotalPrice = booking.TotalPrice
-            };
 
             return Ok(response);
         }
         catch (Exception ex)
         {
             return BadRequest(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Get all bookings owned by the authenticated user
+    /// </summary>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>200 OK - List of user's bookings (can be empty)</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated</description></item>
+    /// </list>
+    /// </returns>
+    [HttpGet("my-bookings")]
+    [ProducesResponseType(typeof(List<BookingResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetMyBookings()
+    {
+        try
+        {
+            // Extract UserID from JWT token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            var bookings = await _bookingService.GetUserBookingsAsync(userId);
+
+            return Ok(bookings);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Get detailed information about a specific booking
+    /// </summary>
+    /// <param name="bookingId">The ID of the booking to retrieve</param>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>200 OK - Booking details including property and owner information</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated or not authorized to view this booking</description></item>
+    ///   <item><description>404 Not Found - Booking does not exist</description></item>
+    /// </list>
+    /// </returns>
+    [HttpGet("{bookingId}")]
+    [ProducesResponseType(typeof(BookingDetailsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetBookingDetails(Guid bookingId)
+    {
+        try
+        {
+            // Extract UserID from JWT token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            var bookingDetails = await _bookingService.GetBookingDetailsAsync(bookingId, userId);
+
+            if (bookingDetails == null)
+            {
+                return NotFound(new { message = "Booking not found" });
+            }
+
+            return Ok(bookingDetails);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
     }
 }
