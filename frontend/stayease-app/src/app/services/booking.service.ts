@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateBookingRequest, BookingResponse } from '../models/booking.model';
+import { CreateBookingRequest, BookingResponse, MyBooking, BookingDetails } from '../models/booking.model';
 import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -11,5 +11,13 @@ export class BookingService {
 
   createBooking(request: CreateBookingRequest): Observable<BookingResponse> {
     return this.http.post<BookingResponse>(this.apiUrl, request);
+  }
+
+  getMyBookings(): Observable<MyBooking[]> {
+    return this.http.get<MyBooking[]>(`${this.apiUrl}/my-bookings`);
+  }
+
+  getBookingDetails(bookingID: string): Observable<BookingDetails> {
+    return this.http.get<BookingDetails>(`${this.apiUrl}/${bookingID}`);
   }
 }
