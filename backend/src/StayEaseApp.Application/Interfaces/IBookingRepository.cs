@@ -12,4 +12,5 @@ public interface IBookingRepository
     Task<List<Booking>> GetByUserIdAsync(Guid userId);
     Task<Booking?> GetByIdAsync(Guid bookingId);
     Task AddAsync(Booking booking);
+    Task UpdateAsync(Booking booking);
 }

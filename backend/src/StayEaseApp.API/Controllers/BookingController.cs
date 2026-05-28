@@ -145,4 +145,56 @@ public class BookingController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Cancel a booking that belongs to the authenticated user
+    /// </summary>
+    /// <param name="bookingId">The ID of the booking to cancel</param>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>200 OK - Booking successfully cancelled</description></item>
+    ///   <item><description>400 Bad Request - Booking cannot be cancelled (already confirmed or cancelled, or invalid status)</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated or not authorized to cancel this booking</description></item>
+    ///   <item><description>404 Not Found - Booking does not exist</description></item>
+    /// </list>
+    /// </returns>
+    [HttpPatch("{bookingId}/cancel")]
+    [ProducesResponseType(typeof(BookingResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CancelBooking(Guid bookingId)
+    {
+        try
+        {
+            // Extract UserID from JWT token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            var response = await _bookingService.CancelBookingAsync(bookingId, userId);
+
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message == "Booking not found")
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

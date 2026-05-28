@@ -47,4 +47,10 @@ public class BookingRepository : IBookingRepository
             .OrderByDescending(b => b.StartDate)
             .ToListAsync();
     }
+
+    public async Task UpdateAsync(Booking booking)
+    {
+        _dbContext.Bookings.Update(booking);
+        await _dbContext.SaveChangesAsync();
+    }
 }

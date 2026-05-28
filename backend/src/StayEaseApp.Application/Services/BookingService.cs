@@ -2,6 +2,7 @@
 using StayEaseApp.Application.Interfaces;
 using StayEaseApp.Application.Mappers;
 using StayEaseApp.Domain.Entities;
+using StayEaseApp.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,38 @@ public class BookingService : IBookingService
     {
         _bookingRepository = bookingRepository;
         _propertyRepository = propertyRepository;
+    }
+
+    public async Task<BookingResponseDto> CancelBookingAsync(Guid bookingId, Guid userId)
+    {
+        // 1. Get booking
+        var booking = await _bookingRepository.GetByIdAsync(bookingId);
+
+        if (booking == null)
+            throw new Exception("Booking not found");
+
+        // 2. Verify booking belongs to the user
+        if (booking.UserID != userId)
+            throw new UnauthorizedAccessException("You don't have permission to cancel this booking");
+
+        // 3. Verify booking is in  Pending status (not Confirmed or already Cancelled)
+        if (booking.BookingStatus == Status.Confirmed)
+            throw new InvalidOperationException("Cannot cancel a confirmed booking");
+
+        if (booking.BookingStatus == Status.Cancelled)
+            throw new InvalidOperationException("Booking is already cancelled");
+
+        if (booking.BookingStatus != Status.Pending)
+            throw new InvalidOperationException("Only pending bookings can be cancelled");
+
+        // 4. Update booking status to Cancelled
+        booking.BookingStatus = Status.Cancelled;
+
+        // 5. Save changes
+        await _bookingRepository.UpdateAsync(booking);
+
+        // Map to DTO
+        return _mapper.BookingToBookingResponseDto(booking);
     }
 
     public async Task<BookingResponseDto> CreateBookingAsync(Guid propertyId, Guid userId, DateTime startDate, DateTime endDate)
