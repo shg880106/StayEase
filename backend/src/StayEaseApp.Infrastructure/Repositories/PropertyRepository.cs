@@ -28,7 +28,9 @@ public class PropertyRepository : IPropertyRepository
 
     public async Task<List<Property>> GetPropertiesAsync()
     {
-        return await _dbContext.Properties.ToListAsync();
+        return await _dbContext.Properties
+            .Where(p => !p.IsDeleted)
+            .ToListAsync();
     }
 
     public async Task<Property> CreatePropertyAsync(Property property)
