@@ -43,7 +43,10 @@ public class PropertyRepository : IPropertyRepository
         var property = await _dbContext.Properties.FindAsync(propertyId);
         if (property != null)
         {
-            _dbContext.Properties.Remove(property);
+            // Soft delete instead of hard delete
+            property.IsDeleted = true;
+            property.DeletedAt = DateTime.UtcNow;
+            _dbContext.Properties.Update(property);
             await _dbContext.SaveChangesAsync();
         }
         else
@@ -64,7 +67,7 @@ public class PropertyRepository : IPropertyRepository
     {
         return await _dbContext.Properties
             .AsNoTracking()
-            .Where(p => p.OwnerID == ownerId)
+            .Where(p => p.OwnerID == ownerId && !p.IsDeleted)
             .ToListAsync();
     }
 }

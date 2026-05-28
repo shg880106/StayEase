@@ -61,6 +61,7 @@ public class PropertyService : IPropertyService
         {
             throw new Exception($"Property with ID {propertyId} not found.");
         }
+
         await _propertyRepository.DeletePropertyAsync(propertyId);
     }
 

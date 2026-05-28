@@ -17,6 +17,10 @@ public class Property
     public int MaxGuests { get; set; }
     public string? ImageUrl { get; set; }
 
+    // Soft delete properties
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+
     // Navigation properties
     public User Owner { get; set; } = null!;
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
