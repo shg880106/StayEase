@@ -197,4 +197,98 @@ public class BookingController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Confirms a pending booking (Owner only)
+    /// </summary>
+    /// <param name="bookingId">The ID of the booking to confirm</param>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>200 OK - Booking successfully confirmed</description></item>
+    ///   <item><description>400 Bad Request - Booking cannot be confirmed (already confirmed or cancelled, or invalid status)</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated or not authorized to confirm this booking</description></item>
+    ///   <item><description>404 Not Found - Booking does not exist</description></item>
+    /// </list>
+    /// </returns>
+    [HttpPatch("{bookingId}/confirm")]
+    [ProducesResponseType(typeof(BookingResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ConfirmBooking(Guid bookingId)
+    {
+        try
+        {
+            // Extract UserID from JWT token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            // Confirm booking (service validates ownership)
+            var response = await _bookingService.ConfirmBookingAsync(bookingId, userId);
+
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get all bookings for a specific property (Owner only)
+    /// </summary>
+    /// <param name="propertyId">The ID of the property</param>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>200 OK - Bookings successfully retrieved</description></item>
+    ///   <item><description>400 Bad Request - Invalid request</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated or not authorized to view bookings for this property</description></item>
+    ///   <item><description>404 Not Found - Property does not exist</description></item>
+    /// </list>
+    /// </returns>
+    [HttpGet("property/{propertyId}")]
+    [ProducesResponseType(typeof(List<BookingResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPropertyBookings(Guid propertyId)
+    {
+        try
+        {
+            // Extract UserID from JWT token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            var bookings = await _bookingService.GetPropertyBookingsAsync(propertyId, userId);
+
+            return Ok(bookings);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

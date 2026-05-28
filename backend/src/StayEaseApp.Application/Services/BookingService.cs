@@ -54,6 +54,7 @@ public class BookingService : IBookingService
         return _mapper.BookingToBookingResponseDto(booking);
     }
 
+
     public async Task<BookingResponseDto> CreateBookingAsync(Guid propertyId, Guid userId, DateTime startDate, DateTime endDate)
     {
         // 1. Get property (needed for price)
@@ -113,10 +114,66 @@ public class BookingService : IBookingService
             }
         };
     }
-
+    
     public async Task<List<BookingResponseDto>> GetUserBookingsAsync(Guid userId)
     {
         var bookings = await _bookingRepository.GetByUserIdAsync(userId);
+        return bookings.Select(b => _mapper.BookingToBookingResponseDto(b)).ToList();
+    }
+
+    public async Task<BookingResponseDto> ConfirmBookingAsync(Guid bookingId, Guid ownerId)
+    {
+        // 1. Get booking with property info
+        var booking = await _bookingRepository.GetByIdAsync(bookingId);
+
+        if (booking == null)
+            throw new Exception("Booking not found");
+
+        // 2. Get property to verify ownership
+        var property = await _propertyRepository.GetByIdAsync(booking.PropertyID);
+
+        if (property == null)
+            throw new Exception("Property not found");
+
+        // 3. Verify the requesting user is the property owner
+        if (property.OwnerID != ownerId)
+            throw new UnauthorizedAccessException("Only the property owner can confirm bookings");
+
+        // 4. Verify booking is in Pending status
+        if (booking.BookingStatus == Status.Confirmed)
+            throw new InvalidOperationException("Booking is already confirmed");
+
+        if (booking.BookingStatus == Status.Cancelled)
+            throw new InvalidOperationException("Cannot confirm a cancelled booking");
+
+        if (booking.BookingStatus != Status.Pending)
+            throw new InvalidOperationException("Only pending bookings can be confirmed");
+
+        // 5. Update booking status to Confirmed
+        booking.BookingStatus = Status.Confirmed;
+
+        // 6. Save changes
+        await _bookingRepository.UpdateAsync(booking);
+
+        // Map to DTO
+        return _mapper.BookingToBookingResponseDto(booking);
+    }
+
+    public async Task<List<BookingResponseDto>> GetPropertyBookingsAsync(Guid propertyId, Guid ownerId)
+    {
+        // 1. Verify property ownership
+        var property = await _propertyRepository.GetByIdAsync(propertyId);
+
+        if (property == null)
+            throw new Exception("Property not found");
+
+        if (property.OwnerID != ownerId)
+            throw new UnauthorizedAccessException("You don't have permission to view bookings for this property");
+
+        // 2. Get all bookings for the property
+        var bookings = await _bookingRepository.GetByPropertyIdAsync(propertyId);
+
+        // 3. Map to DTOs
         return bookings.Select(b => _mapper.BookingToBookingResponseDto(b)).ToList();
     }
 }
