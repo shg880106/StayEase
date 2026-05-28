@@ -24,4 +24,12 @@ export class BookingService {
   cancelBooking(bookingID: string): Observable<BookingDetails> {
     return this.http.request<BookingDetails>('PATCH', `${this.apiUrl}/${bookingID}/cancel`, {});
   }
+
+  confirmBooking(bookingID: string): Observable<BookingResponse> {
+    return this.http.request<BookingResponse>('PATCH', `${this.apiUrl}/${bookingID}/confirm`, {});
+  }
+
+  getPropertyBookings(propertyID: string): Observable<MyBooking[]> {
+    return this.http.get<MyBooking[]>(`${this.apiUrl}/property/${propertyID}`);
+  }
 }

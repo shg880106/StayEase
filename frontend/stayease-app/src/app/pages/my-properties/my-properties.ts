@@ -1,16 +1,32 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NgClass } from '@angular/common';
 import { PropertyService } from '../../services/property.service';
 import { AuthService } from '../../services/auth.service';
+import { BookingService } from '../../services/booking.service';
 import { Property } from '../../models/property.model';
+import { MyBooking } from '../../models/booking.model';
+
+const STATUS_LABELS: Record<number, string> = {
+  1: 'Pending',
+  2: 'Confirmed',
+  3: 'Cancelled',
+};
+
+const STATUS_CLASSES: Record<number, string> = {
+  1: 'bg-yellow-100 text-yellow-700',
+  2: 'bg-green-100 text-green-700',
+  3: 'bg-red-100 text-red-600',
+};
 
 @Component({
   selector: 'app-my-properties',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, NgClass],
   templateUrl: './my-properties.html',
 })
 export class MyPropertiesComponent implements OnInit {
   private readonly propertyService = inject(PropertyService);
+  private readonly bookingService = inject(BookingService);
   readonly authService = inject(AuthService);
   private readonly fb = inject(FormBuilder);
 
@@ -30,6 +46,15 @@ export class MyPropertiesComponent implements OnInit {
   readonly showDeleteConfirm = signal(false);
   readonly pendingDeleteId = signal<string | null>(null);
   readonly deleteSuccessTitle = signal<string | null>(null);
+
+  readonly showBookingsModal = signal(false);
+  readonly selectedPropertyForBookings = signal<Property | null>(null);
+  readonly propertyBookings = signal<MyBooking[]>([]);
+  readonly bookingsLoading = signal(false);
+  readonly bookingsError = signal<string | null>(null);
+  readonly confirmingId = signal<string | null>(null);
+  readonly confirmSuccessId = signal<string | null>(null);
+  readonly bookingCounts = signal<Map<string, number>>(new Map());
 
   readonly createForm = this.fb.group({
     title: ['', Validators.required],
@@ -191,16 +216,98 @@ export class MyPropertiesComponent implements OnInit {
     });
   }
 
+  openBookingsModal(property: Property): void {
+    this.selectedPropertyForBookings.set(property);
+    this.propertyBookings.set([]);
+    this.bookingsError.set(null);
+    this.bookingsLoading.set(true);
+    this.showBookingsModal.set(true);
+    this.bookingService.getPropertyBookings(property.propertyID).subscribe({
+      next: (data) => {
+        this.propertyBookings.set(data);
+        this.bookingsLoading.set(false);
+        this.bookingCounts.update(map => {
+          const next = new Map(map);
+          next.set(property.propertyID, data.length);
+          return next;
+        });
+      },
+      error: () => {
+        this.bookingsError.set('Failed to load bookings for this property.');
+        this.bookingsLoading.set(false);
+      },
+    });
+  }
+
+  closeBookingsModal(): void {
+    this.showBookingsModal.set(false);
+    this.selectedPropertyForBookings.set(null);
+  }
+
+  confirmBooking(bookingID: string): void {
+    this.confirmingId.set(bookingID);
+    this.bookingService.confirmBooking(bookingID).subscribe({
+      next: () => {
+        this.propertyBookings.update(list =>
+          list.map(b => b.bookingID === bookingID ? { ...b, bookingStatus: 2 } : b)
+        );
+        this.confirmingId.set(null);
+        this.confirmSuccessId.set(bookingID);
+        setTimeout(() => this.confirmSuccessId.set(null), 3000);
+      },
+      error: () => {
+        this.confirmingId.set(null);
+      },
+    });
+  }
+
+  statusLabel(status: number): string {
+    return STATUS_LABELS[status] ?? 'Unknown';
+  }
+
+  statusClass(status: number): string {
+    return STATUS_CLASSES[status] ?? 'bg-gray-100 text-gray-600';
+  }
+
+  formatDate(dateStr: string): string {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
+  nights(start: string, end: string): number {
+    const ms = new Date(end).getTime() - new Date(start).getTime();
+    return Math.round(ms / (1000 * 60 * 60 * 24));
+  }
+
   private loadProperties(): void {
     this.propertyService.getMyProperties().subscribe({
       next: (data) => {
         this.properties.set(data);
         this.loading.set(false);
+        this.loadBookingCounts(data.map(p => p.propertyID));
       },
       error: () => {
         this.error.set('Failed to load your properties. Please try again.');
         this.loading.set(false);
       },
+    });
+  }
+
+  private loadBookingCounts(propertyIDs: string[]): void {
+    propertyIDs.forEach(id => {
+      this.bookingService.getPropertyBookings(id).subscribe({
+        next: (bookings) => {
+          this.bookingCounts.update(map => {
+            const next = new Map(map);
+            next.set(id, bookings.length);
+            return next;
+          });
+        },
+        error: () => {},
+      });
     });
   }
 }
