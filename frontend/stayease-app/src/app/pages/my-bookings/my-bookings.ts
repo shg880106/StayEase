@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BookingService } from '../../services/booking.service';
@@ -27,6 +27,10 @@ export class MyBookingsComponent implements OnInit {
   readonly bookings = signal<MyBooking[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+
+  readonly pendingBookings = computed(() => this.bookings().filter(b => b.bookingStatus === 1));
+  readonly confirmedBookings = computed(() => this.bookings().filter(b => b.bookingStatus === 2));
+  readonly cancelledBookings = computed(() => this.bookings().filter(b => b.bookingStatus === 3));
 
   readonly showDetailsModal = signal(false);
   readonly selectedDetails = signal<BookingDetails | null>(null);
@@ -59,6 +63,25 @@ export class MyBookingsComponent implements OnInit {
       error: () => {
         this.detailsError.set('Failed to load booking details.');
         this.detailsLoading.set(false);
+      },
+    });
+  }
+
+  cancelBooking(bookingID: string): void {
+    if (!confirm('Are you sure you want to cancel this booking?')) {
+      return;
+    }
+    this.bookingService.cancelBooking(bookingID).subscribe({
+      next: () => {
+        this.bookings.update(bookings => bookings.map(b => b.bookingID === bookingID ? { ...b, bookingStatus: 3 } : b));
+        if (this.selectedDetails()?.bookingID === bookingID) {
+          this.selectedDetails.update(details => details ? { ...details, bookingStatus: 3 } : details);
+        } else {
+          this.selectedDetails.set(null);
+        }
+      },
+      error: () => {
+        alert('Failed to cancel booking. Please try again.');
       },
     });
   }

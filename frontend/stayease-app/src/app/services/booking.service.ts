@@ -20,4 +20,8 @@ export class BookingService {
   getBookingDetails(bookingID: string): Observable<BookingDetails> {
     return this.http.get<BookingDetails>(`${this.apiUrl}/${bookingID}`);
   }
+
+  cancelBooking(bookingID: string): Observable<BookingDetails> {
+    return this.http.request<BookingDetails>('PATCH', `${this.apiUrl}/${bookingID}/cancel`, {});
+  }
 }

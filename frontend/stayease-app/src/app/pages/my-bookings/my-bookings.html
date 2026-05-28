@@ -43,47 +43,130 @@
 
     <!-- Bookings list -->
     @if (!loading() && !error() && bookings().length > 0) {
-      <div class="flex flex-col gap-4">
-        @for (booking of bookings(); track booking.bookingID) {
-          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-            <!-- Left: dates & nights -->
-            <div class="flex items-start gap-4">
-              <div class="w-11 h-11 bg-rose-100 rounded-xl flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
-                </svg>
+      <!-- Pending -->
+      @if (pendingBookings().length > 0) {
+        <div class="mb-8">
+          <h2 class="text-base font-semibold text-yellow-700 mb-3 flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+            Pending
+          </h2>
+          <div class="flex flex-col gap-4">
+            @for (booking of pendingBookings(); track booking.bookingID) {
+              <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-start gap-4">
+                  <div class="w-11 h-11 bg-rose-100 rounded-xl flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">{{ formatDate(booking.startDate) }} &rarr; {{ formatDate(booking.endDate) }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ nights(booking.startDate, booking.endDate) }} night(s)</p>
+                    <p class="text-xs text-gray-400 mt-0.5 font-mono">Booking #{{ booking.bookingID.slice(0, 8).toUpperCase() }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 sm:flex-col sm:items-end">
+                  <span class="text-lg font-bold text-gray-900">${{ booking.totalPrice.toFixed(2) }}</span>
+                  <span class="text-xs font-semibold px-2.5 py-1 rounded-full" [ngClass]="statusClass(booking.bookingStatus)">{{ statusLabel(booking.bookingStatus) }}</span>
+                  <button (click)="openDetails(booking.bookingID)" class="flex items-center gap-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 border border-rose-200 hover:border-rose-400 px-3 py-1.5 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    See Details
+                  </button>                  
+                  <button (click)="cancelBooking(booking.bookingID)" class="flex items-center gap-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 border border-rose-200 hover:border-rose-400 px-3 py-1.5 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Cancel Booking
+                  </button>
+                </div>
               </div>
-              <div>
-                <p class="text-sm font-semibold text-gray-900">
-                  {{ formatDate(booking.startDate) }} &rarr; {{ formatDate(booking.endDate) }}
-                </p>
-                <p class="text-xs text-gray-400 mt-0.5">{{ nights(booking.startDate, booking.endDate) }} night(s)</p>
-                <p class="text-xs text-gray-400 mt-0.5 font-mono">Booking #{{ booking.bookingID.slice(0, 8).toUpperCase() }}</p>
-              </div>
-            </div>
-
-            <!-- Right: price, status & action -->
-            <div class="flex items-center gap-4 sm:flex-col sm:items-end">
-              <span class="text-lg font-bold text-gray-900">${{ booking.totalPrice.toFixed(2) }}</span>
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
-                    [ngClass]="statusClass(booking.bookingStatus)">
-                {{ statusLabel(booking.bookingStatus) }}
-              </span>
-              <button
-                (click)="openDetails(booking.bookingID)"
-                class="flex items-center gap-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 border border-rose-200 hover:border-rose-400 px-3 py-1.5 rounded-lg transition-colors">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                See Details
-              </button>
-            </div>
-
+            }
           </div>
-        }
-      </div>
+        </div>
+      }
+
+      <!-- Confirmed -->
+      @if (confirmedBookings().length > 0) {
+        <div class="mb-8">
+          <h2 class="text-base font-semibold text-green-700 mb-3 flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-green-400"></span>
+            Confirmed
+          </h2>
+          <div class="flex flex-col gap-4">
+            @for (booking of confirmedBookings(); track booking.bookingID) {
+              <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-start gap-4">
+                  <div class="w-11 h-11 bg-rose-100 rounded-xl flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">{{ formatDate(booking.startDate) }} &rarr; {{ formatDate(booking.endDate) }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ nights(booking.startDate, booking.endDate) }} night(s)</p>
+                    <p class="text-xs text-gray-400 mt-0.5 font-mono">Booking #{{ booking.bookingID.slice(0, 8).toUpperCase() }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 sm:flex-col sm:items-end">
+                  <span class="text-lg font-bold text-gray-900">${{ booking.totalPrice.toFixed(2) }}</span>
+                  <span class="text-xs font-semibold px-2.5 py-1 rounded-full" [ngClass]="statusClass(booking.bookingStatus)">{{ statusLabel(booking.bookingStatus) }}</span>
+                  <button (click)="openDetails(booking.bookingID)" class="flex items-center gap-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 border border-rose-200 hover:border-rose-400 px-3 py-1.5 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    See Details
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Cancelled -->
+      @if (cancelledBookings().length > 0) {
+        <div class="mb-8">
+          <h2 class="text-base font-semibold text-red-600 mb-3 flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-400"></span>
+            Cancelled
+          </h2>
+          <div class="flex flex-col gap-4">
+            @for (booking of cancelledBookings(); track booking.bookingID) {
+              <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-start gap-4">
+                  <div class="w-11 h-11 bg-rose-100 rounded-xl flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">{{ formatDate(booking.startDate) }} &rarr; {{ formatDate(booking.endDate) }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ nights(booking.startDate, booking.endDate) }} night(s)</p>
+                    <p class="text-xs text-gray-400 mt-0.5 font-mono">Booking #{{ booking.bookingID.slice(0, 8).toUpperCase() }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 sm:flex-col sm:items-end">
+                  <span class="text-lg font-bold text-gray-900">${{ booking.totalPrice.toFixed(2) }}</span>
+                  <span class="text-xs font-semibold px-2.5 py-1 rounded-full" [ngClass]="statusClass(booking.bookingStatus)">{{ statusLabel(booking.bookingStatus) }}</span>
+                  <button (click)="openDetails(booking.bookingID)" class="flex items-center gap-1.5 text-xs font-semibold text-rose-500 hover:text-rose-600 border border-rose-200 hover:border-rose-400 px-3 py-1.5 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    See Details
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
     }
 
   </div>
