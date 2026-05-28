@@ -2,6 +2,7 @@
 using StayEaseApp.Application.Interfaces;
 using StayEaseApp.Application.Mappers;
 using StayEaseApp.Domain.Entities;
+using StayEaseApp.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +13,13 @@ namespace StayEaseApp.Application.Services;
 public class PropertyService : IPropertyService
 {
     private readonly IPropertyRepository _propertyRepository;
+    private readonly IBookingRepository _bookingRepository;
     private readonly PropertyMapper _mapper = new();
 
-    public PropertyService(IPropertyRepository propertyRepository)
+    public PropertyService(IPropertyRepository propertyRepository, IBookingRepository bookingRepository)
     {
         _propertyRepository = propertyRepository;
+        _bookingRepository = bookingRepository;
     }
 
 
@@ -104,6 +107,36 @@ public class PropertyService : IPropertyService
         if (filters.MaxGuests.HasValue)
         {
             properties = properties.Where(p => p.MaxGuests <= filters.MaxGuests.Value).ToList();
+        }
+
+        // Apply date availability filter
+        if (filters.CheckInDate.HasValue && filters.CheckOutDate.HasValue)
+        {
+            // Validate date range
+            if (filters.CheckInDate.Value >= filters.CheckOutDate.Value)
+            {
+                throw new ArgumentException("CheckInDate must be before CheckOutDate");
+            }
+
+            var availableProperties = new List<Property>();
+
+            foreach (var property in properties)
+            {
+                // Get all bookings for this property
+                var bookings = await _bookingRepository.GetByPropertyIdAsync(property.PropertyID);
+
+                // Check if there's any confirmed booking that overlaps with the requested dates
+                var hasConflict = bookings
+                    .Any(b => b.Overlaps(filters.CheckInDate.Value, filters.CheckOutDate.Value));
+
+                // If no conflict, property is available
+                if (!hasConflict)
+                {
+                    availableProperties.Add(property);
+                }
+            }
+
+            properties = availableProperties;
         }
 
         return properties.Select(p => _mapper.PropertyToPropertyResponseDto(p)).ToList();

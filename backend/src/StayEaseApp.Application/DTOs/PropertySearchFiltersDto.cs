@@ -12,4 +12,6 @@ public class PropertySearchFiltersDto
     public decimal? MaxPrice { get; set; }
     public int? MinGuests { get; set; }
     public int? MaxGuests { get; set; }
+    public DateTime? CheckInDate { get; set; }
+    public DateTime? CheckOutDate { get; set; }
 }
