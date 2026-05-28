@@ -67,7 +67,7 @@ export class BookingComponent implements OnInit {
   }
 
   onFiltersApplied(filters: PropertySearchFilters): void {
-    const hasFilters = !!(filters.location || filters.minGuests || filters.maxGuests || filters.minPrice || filters.maxPrice);
+    const hasFilters = !!(filters.location || filters.minGuests || filters.maxGuests || filters.minPrice || filters.maxPrice || filters.checkInDate || filters.checkOutDate );
 
     if (!hasFilters) {
       this.filteredProperties.set(this.properties());
@@ -132,7 +132,9 @@ export class BookingComponent implements OnInit {
         },
         error: (err) => {
           this.bookingError.set(
-            typeof err.error === 'string' ? err.error : 'Something went wrong. Please try again.'
+            typeof err.error === 'string'
+              ? err.error
+              : err.error?.message ?? 'Something went wrong. Please try again.'
           );
           this.bookingForm.reset();
           this.isLoading.set(false);
