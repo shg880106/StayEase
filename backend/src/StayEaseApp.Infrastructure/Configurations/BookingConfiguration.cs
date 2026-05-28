@@ -20,9 +20,10 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
                 .HasForeignKey(b => b.UserID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+        // Relationship with Property - RESTRICT delete to preserve booking history
         builder.HasOne(b => b.Property)
                 .WithMany(p => p.Bookings)
                 .HasForeignKey(b => b.PropertyID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
     }
 }
