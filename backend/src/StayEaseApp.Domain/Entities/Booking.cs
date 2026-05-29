@@ -22,6 +22,7 @@ public class Booking
     // Navigation properties
     public User User { get; set; } = null!;
     public Property Property { get; set; } = null!;
+    public Review? Review { get; set; } // 1:1
 
     private Booking() { }
 
@@ -44,5 +45,17 @@ public class Booking
     public bool Overlaps(DateTime startDate, DateTime endDate)
     {
         return StartDate < endDate && EndDate > startDate;
+    }
+    
+    public bool CanBeReviewed() 
+    { 
+        return BookingStatus == Status.Finished 
+            && Review == null
+            && EndDate < DateTime.UtcNow; 
+    }
+
+    public bool IsFinishedAndPast()
+    {
+        return BookingStatus == Status.Finished && EndDate < DateTime.UtcNow;
     }
 }

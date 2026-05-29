@@ -33,6 +33,16 @@ public class BookingRepository : IBookingRepository
             .FirstOrDefaultAsync(b => b.BookingID == bookingId);
     }
 
+    public async Task<Booking?> GetByIdWithReviewAsync(Guid bookingId)
+    {
+        return await _dbContext.Bookings
+            .Include(b => b.Property)
+                .ThenInclude(p => p.Owner)
+            .Include(b => b.User)
+            .Include(b => b.Review) 
+            .FirstOrDefaultAsync(b => b.BookingID == bookingId);
+    }
+
     public async Task<List<Booking>> GetByPropertyIdAsync(Guid propertyId)
     {
         return await _dbContext.Bookings
