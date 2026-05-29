@@ -1,8 +1,10 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Button } from 'primeng/button';
 import { BookingService } from '../../services/booking.service';
 import { MyBooking, BookingDetails } from '../../models/booking.model';
+import { BookingDetailsModalComponent, BookingDetailsModalData } from '../../components/booking/booking-details-modal';
 
 const STATUS_LABELS: Record<number, string> = {
   1: 'Pending',
@@ -18,7 +20,7 @@ const STATUS_CLASSES: Record<number, string> = {
 
 @Component({
   selector: 'app-my-bookings',
-  imports: [NgClass, RouterLink],
+  imports: [NgClass, RouterLink, BookingDetailsModalComponent, Button],
   templateUrl: './my-bookings.html',
 })
 export class MyBookingsComponent implements OnInit {
@@ -33,9 +35,24 @@ export class MyBookingsComponent implements OnInit {
   readonly cancelledBookings = computed(() => this.bookings().filter(b => b.bookingStatus === 3));
 
   readonly showDetailsModal = signal(false);
-  readonly selectedDetails = signal<BookingDetails | null>(null);
+  readonly selectedDetails = signal<BookingDetailsModalData | null>(null);
   readonly detailsLoading = signal(false);
   readonly detailsError = signal<string | null>(null);
+
+  readonly cancelSuccessId = signal<string | null>(null);
+  readonly cancelErrorMessage = signal<string | null>(null);
+
+  private mapToModalData(d: BookingDetails): BookingDetailsModalData {
+    return {
+      bookingID: d.bookingID,
+      startDate: d.startDate,
+      endDate: d.endDate,
+      totalPrice: d.totalPrice,
+      bookingStatus: d.bookingStatus,
+      property: d.property,
+      person: { label: 'Host', name: d.owner.name, email: d.owner.email },
+    };
+  }
 
   ngOnInit(): void {
     this.bookingService.getMyBookings().subscribe({
@@ -57,7 +74,7 @@ export class MyBookingsComponent implements OnInit {
     this.showDetailsModal.set(true);
     this.bookingService.getBookingDetails(bookingID).subscribe({
       next: (data) => {
-        this.selectedDetails.set(data);
+        this.selectedDetails.set(this.mapToModalData(data));
         this.detailsLoading.set(false);
       },
       error: () => {
@@ -79,9 +96,13 @@ export class MyBookingsComponent implements OnInit {
         } else {
           this.selectedDetails.set(null);
         }
+        this.cancelSuccessId.set(bookingID);
+        setTimeout(() => this.cancelSuccessId.set(null), 4000);
       },
-      error: () => {
-        alert('Failed to cancel booking. Please try again.');
+      error: (err) => {
+        const msg = err?.error?.message ?? 'Failed to cancel booking. Please try again.';
+        this.cancelErrorMessage.set(msg);
+        setTimeout(() => this.cancelErrorMessage.set(null), 4000);
       },
     });
   }

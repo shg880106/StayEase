@@ -44,6 +44,21 @@ export interface OwnerDetails {
   email: string;
 }
 
+export interface BookingDetailsForOwnerDto {
+  bookingID: string;
+  startDate: string;
+  endDate: string;
+  totalPrice: number;
+  bookingStatus: number;
+  property: PropertyDetails;
+  guest: GuestDetails;
+}
+
+export interface GuestDetails {
+  name: string;
+  email: string;
+}
+
 
 
 

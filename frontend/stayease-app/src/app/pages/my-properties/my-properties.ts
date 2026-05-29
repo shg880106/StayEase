@@ -1,11 +1,13 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
+import { Button } from 'primeng/button';
 import { PropertyService } from '../../services/property.service';
 import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
 import { Property } from '../../models/property.model';
-import { MyBooking } from '../../models/booking.model';
+import { MyBooking, BookingDetailsForOwnerDto } from '../../models/booking.model';
+import { BookingDetailsModalComponent, BookingDetailsModalData } from '../../components/booking/booking-details-modal';
 
 const STATUS_LABELS: Record<number, string> = {
   1: 'Pending',
@@ -21,7 +23,7 @@ const STATUS_CLASSES: Record<number, string> = {
 
 @Component({
   selector: 'app-my-properties',
-  imports: [ReactiveFormsModule, NgClass],
+  imports: [ReactiveFormsModule, NgClass, BookingDetailsModalComponent, Button],
   templateUrl: './my-properties.html',
 })
 export class MyPropertiesComponent implements OnInit {
@@ -54,7 +56,27 @@ export class MyPropertiesComponent implements OnInit {
   readonly bookingsError = signal<string | null>(null);
   readonly confirmingId = signal<string | null>(null);
   readonly confirmSuccessId = signal<string | null>(null);
+  readonly confirmErrorMessage = signal<string | null>(null);
+  readonly cancelSuccessId = signal<string | null>(null);
+  readonly cancelErrorMessage = signal<string | null>(null);
   readonly bookingCounts = signal<Map<string, number>>(new Map());
+
+  readonly showBookingDetailsModal = signal(false);
+  readonly selectedBookingDetails = signal<BookingDetailsModalData | null>(null);
+  readonly bookingDetailsLoading = signal(false);
+  readonly bookingDetailsError = signal<string | null>(null);
+
+  private mapToModalData(d: BookingDetailsForOwnerDto): BookingDetailsModalData {
+    return {
+      bookingID: d.bookingID,
+      startDate: d.startDate,
+      endDate: d.endDate,
+      totalPrice: d.totalPrice,
+      bookingStatus: d.bookingStatus,
+      property: d.property,
+      person: { label: 'Guest', name: d.guest.name, email: d.guest.email },
+    };
+  }
 
   readonly createForm = this.fb.group({
     title: ['', Validators.required],
@@ -253,10 +275,56 @@ export class MyPropertiesComponent implements OnInit {
         );
         this.confirmingId.set(null);
         this.confirmSuccessId.set(bookingID);
-        setTimeout(() => this.confirmSuccessId.set(null), 3000);
+        setTimeout(() => this.confirmSuccessId.set(null), 4000);
       },
       error: () => {
         this.confirmingId.set(null);
+        this.confirmErrorMessage.set('Failed to confirm booking. Please try again.');
+        setTimeout(() => this.confirmErrorMessage.set(null), 4000);
+      },
+    });
+  }
+
+  openBookingDetails(bookingID: string): void {
+    this.selectedBookingDetails.set(null);
+    this.bookingDetailsError.set(null);
+    this.bookingDetailsLoading.set(true);
+    this.showBookingDetailsModal.set(true);
+    this.bookingService.getBookingDetailsForOwner(bookingID).subscribe({
+      next: (data) => {
+        this.selectedBookingDetails.set(this.mapToModalData(data));
+        this.bookingDetailsLoading.set(false);
+      },
+      error: () => {
+        this.bookingDetailsError.set('Failed to load booking details.');
+        this.bookingDetailsLoading.set(false);
+      },
+    });
+  }
+
+  closeBookingDetails(): void {
+    this.showBookingDetailsModal.set(false);
+  }
+
+  cancelBooking(bookingID: string): void {
+    if (!confirm('Are you sure you want to cancel this booking?')) {
+      return;
+    }
+    this.bookingService.cancelBooking(bookingID).subscribe({
+      next: () => {
+        this.propertyBookings.update(bookings => bookings.map(b => b.bookingID === bookingID ? { ...b, bookingStatus: 3 } : b));
+        if (this.selectedBookingDetails()?.bookingID === bookingID) {
+          this.selectedBookingDetails.update(details => details ? { ...details, bookingStatus: 3 } : details);
+        } else {
+          this.selectedBookingDetails.set(null);
+        }
+        this.cancelSuccessId.set(bookingID);
+        setTimeout(() => this.cancelSuccessId.set(null), 4000);
+      },
+      error: (err) => {
+        const msg = err?.error?.message ?? 'Failed to cancel booking. Please try again.';
+        this.cancelErrorMessage.set(msg);
+        setTimeout(() => this.cancelErrorMessage.set(null), 4000);
       },
     });
   }
@@ -280,7 +348,7 @@ export class MyPropertiesComponent implements OnInit {
   nights(start: string, end: string): number {
     const ms = new Date(end).getTime() - new Date(start).getTime();
     return Math.round(ms / (1000 * 60 * 60 * 24));
-  }
+  }  
 
   private loadProperties(): void {
     this.propertyService.getMyProperties().subscribe({

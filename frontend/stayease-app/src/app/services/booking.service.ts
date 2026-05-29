@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateBookingRequest, BookingResponse, MyBooking, BookingDetails } from '../models/booking.model';
+import { CreateBookingRequest, BookingResponse, MyBooking, BookingDetails, BookingDetailsForOwnerDto } from '../models/booking.model';
 import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -31,5 +31,9 @@ export class BookingService {
 
   getPropertyBookings(propertyID: string): Observable<MyBooking[]> {
     return this.http.get<MyBooking[]>(`${this.apiUrl}/property/${propertyID}`);
+  }
+
+  getBookingDetailsForOwner(bookingID: string): Observable<BookingDetailsForOwnerDto> {
+    return this.http.get<BookingDetailsForOwnerDto>(`${this.apiUrl}/my-properties/${bookingID}`);
   }
 }
