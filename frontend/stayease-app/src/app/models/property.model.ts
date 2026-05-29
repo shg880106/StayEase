@@ -34,4 +34,6 @@ export interface PropertySearchFilters {
   maxGuests: number | null;
   minPrice: number | null;
   maxPrice: number | null;
+  checkInDate: string | null;
+  checkOutDate: string | null;
 }

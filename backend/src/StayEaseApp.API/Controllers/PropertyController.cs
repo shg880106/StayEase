@@ -228,6 +228,13 @@ public class PropertyController : ControllerBase
     ///   <item><description>400 Bad Request - Invalid input data or property validation failed</description></item>
     /// </list>
     /// </returns>
+    /// <remarks>
+    /// Sample request with date availability:
+    ///
+    ///     GET /api/Property/search/filter?Location=Miami&amp;CheckInDate=2026-06-01&amp;CheckOutDate=2026-06-07
+    ///
+    /// This will return only properties that are available (no confirmed bookings) for the specified date range.
+    /// </remarks>
     [HttpGet("search/filter")]
     [ProducesResponseType(typeof(List<PropertyResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

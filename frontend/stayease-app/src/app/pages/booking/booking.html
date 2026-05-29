@@ -6,7 +6,7 @@
   </div>
 </div>
 
-<!-- Main content: sidebar + grid -->
+<!-- Main content: sidebar + grid + booking form -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex gap-8 items-start">
 
   <!-- Filter Sidebar -->
@@ -51,7 +51,7 @@
     </div>
   }
 
-  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div [class]="'grid gap-6 ' + (selectedProperty() ? 'grid-cols-1 sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3')">
     @for (property of filteredProperties(); track property.propertyID) {
       <div
         class="bg-white rounded-2xl overflow-hidden border transition-all cursor-pointer hover:shadow-lg"
@@ -125,23 +125,32 @@
       }
     }
   </div>
-  </div><!-- end flex-1 -->
-</div><!-- end flex wrapper -->
+  <!-- end flex-1 -->
+  </div>
 
-<!-- Booking Form (appears when a property is selected) -->
-@if (selectedProperty()) {
-  <div #formSection class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-    <div class="max-w-xl mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+  <!-- Booking Form Panel -->
+  @if (selectedProperty()) {
+  <div #formSection class="w-96 shrink-0 sticky top-6">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
 
       <!-- Form header -->
       <div class="flex items-center gap-3 mb-6">
         <div class="w-10 h-10 rounded-xl overflow-hidden shrink-0">
           <img [src]="selectedProperty()!.imageUrl" [alt]="selectedProperty()!.title" class="w-full h-full object-cover"/>
         </div>
-        <div>
-          <h2 class="text-lg font-bold text-gray-900">Book {{ selectedProperty()!.title }}</h2>
+        <div class="flex-1 min-w-0">
+          <h2 class="text-lg font-bold text-gray-900 truncate">Book {{ selectedProperty()!.title }}</h2>
           <p class="text-xs text-gray-400">{{ selectedProperty()!.location }}</p>
         </div>
+        <button
+          type="button"
+          (click)="closeBookingPanel()"
+          class="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          aria-label="Close">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
       </div>
 
       <!-- Success Message -->
@@ -159,6 +168,12 @@
           <p class="text-green-700 text-sm font-semibold">
             Total: ${{ bookingResult()!.totalPrice | number: '1.2-2' }}
           </p>
+          <button
+            type="button"
+            (click)="closeBookingPanel()"
+            class="mt-4 w-full text-sm font-semibold py-2 rounded-xl bg-green-100 text-green-800 hover:bg-green-200 transition-colors">
+            Done
+          </button>
         </div>
       }
 
@@ -174,25 +189,6 @@
 
       <!-- Form -->
       <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" novalidate>
-
-        <!-- User ID -->
-        <div class="mb-5">
-          <label class="block text-sm font-medium text-gray-700 mb-1.5">
-            User ID <span class="text-rose-500">*</span>
-          </label>
-          <input
-            type="text"
-            formControlName="userID"
-            placeholder="e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6"
-            class="w-full border rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-300 outline-none transition-colors font-mono"
-            [class.border-gray-200]="!bookingForm.get('userID')?.touched || !bookingForm.get('userID')?.invalid"
-            [class.focus:border-rose-400]="!bookingForm.get('userID')?.invalid"
-            [class.border-red-400]="bookingForm.get('userID')?.touched && bookingForm.get('userID')?.invalid"
-            [class.bg-red-50]="bookingForm.get('userID')?.touched && bookingForm.get('userID')?.invalid"/>
-          @if (userIDErrors) {
-            <p class="mt-1.5 text-xs text-red-500">{{ userIDErrors }}</p>
-          }
-        </div>
 
         <!-- Dates Row -->
         <div class="grid grid-cols-2 gap-4 mb-5">
@@ -269,4 +265,6 @@
       </form>
     </div>
   </div>
-}
+  }
+
+</div><!-- end flex wrapper -->

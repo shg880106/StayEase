@@ -20,6 +20,8 @@ export class PropertyService {
     if (filters.maxPrice != null) params = params.set('maxPrice', filters.maxPrice.toString());
     if (filters.minGuests != null) params = params.set('minGuests', filters.minGuests.toString());
     if (filters.maxGuests != null) params = params.set('maxGuests', filters.maxGuests.toString());
+    if (filters.checkInDate) params = params.set('checkInDate', filters.checkInDate);
+    if (filters.checkOutDate) params = params.set('checkOutDate', filters.checkOutDate);
     return this.http.get<Property[]>(`${this.apiUrl}/search/filter`, { params });
   }
 
