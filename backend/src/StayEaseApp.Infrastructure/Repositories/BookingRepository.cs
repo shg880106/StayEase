@@ -29,6 +29,7 @@ public class BookingRepository : IBookingRepository
         return await _dbContext.Bookings
             .Include(b => b.Property)
                 .ThenInclude(p => p.Owner)
+            .Include(b => b.User)
             .FirstOrDefaultAsync(b => b.BookingID == bookingId);
     }
 

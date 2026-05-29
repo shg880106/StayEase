@@ -147,6 +147,54 @@ public class BookingController : ControllerBase
     }
 
     /// <summary>
+    /// Get detailed information about a specific booking from the owner's perspective
+    /// Includes guest information instead of owner information
+    /// </summary>
+    /// <param name="bookingId">The ID of the booking to retrieve</param>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>200 OK - Booking details including property and guest information</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated or not authorized to view this booking</description></item>
+    ///   <item><description>404 Not Found - Booking does not exist</description></item>
+    /// </list>
+    /// </returns>
+    [HttpGet("my-properties/{bookingId}")]
+    [ProducesResponseType(typeof(BookingDetailsForOwnerDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetBookingDetailsForOwner(Guid bookingId)
+    {
+        try
+        {
+            // Extract UserID from JWT token claims (this is the owner ID)
+            var ownerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(ownerIdClaim) || !Guid.TryParse(ownerIdClaim, out var ownerId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            var bookingDetails = await _bookingService.GetBookingDetailsForOwnerAsync(bookingId, ownerId);
+
+            if (bookingDetails == null)
+            {
+                return NotFound(new { message = "Booking not found" });
+            }
+
+            return Ok(bookingDetails);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Cancel a booking that belongs to the authenticated user
     /// </summary>
     /// <param name="bookingId">The ID of the booking to cancel</param>

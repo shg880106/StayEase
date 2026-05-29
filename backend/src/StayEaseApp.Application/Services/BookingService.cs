@@ -30,8 +30,8 @@ public class BookingService : IBookingService
         if (booking == null)
             throw new Exception("Booking not found");
 
-        // 2. Verify booking belongs to the user
-        if (booking.UserID != userId)
+        // 2. Verify booking belongs to the user 
+        if (booking.UserID != userId && booking.Property.OwnerID != userId)
             throw new UnauthorizedAccessException("You don't have permission to cancel this booking");
 
         // 3. Verify booking is in  Pending status (not Confirmed or already Cancelled)
@@ -114,7 +114,43 @@ public class BookingService : IBookingService
             }
         };
     }
-    
+
+    public async Task<BookingDetailsForOwnerDto?> GetBookingDetailsForOwnerAsync(Guid bookingId, Guid ownerId)
+    {
+        var booking = await _bookingRepository.GetByIdAsync(bookingId);
+
+        if (booking == null)
+            return null;
+
+        // Ensure the booking's property belongs to the requesting owner
+        if (booking.Property.OwnerID != ownerId)
+            throw new UnauthorizedAccessException("You don't have permission to view this booking");
+
+        // Map to detailed DTO with guest information
+        return new BookingDetailsForOwnerDto
+        {
+            BookingID = booking.BookingID,
+            StartDate = booking.StartDate,
+            EndDate = booking.EndDate,
+            TotalPrice = booking.TotalPrice,
+            BookingStatus = booking.BookingStatus,
+            Property = new PropertyDetailsDto
+            {
+                PropertyID = booking.Property.PropertyID,
+                Title = booking.Property.Title,
+                Location = booking.Property.Location,
+                Description = booking.Property.Description,
+                PricePerNight = booking.Property.PricePerNight,
+                ImageUrl = booking.Property.ImageUrl
+            },
+            Guest = new GuestDetailsDto
+            {
+                Name = booking.User.Name,
+                Email = booking.User.Email
+            }
+        };
+    }
+
     public async Task<List<BookingResponseDto>> GetUserBookingsAsync(Guid userId)
     {
         var bookings = await _bookingRepository.GetByUserIdAsync(userId);
@@ -175,5 +211,5 @@ public class BookingService : IBookingService
 
         // 3. Map to DTOs
         return bookings.Select(b => _mapper.BookingToBookingResponseDto(b)).ToList();
-    }
+    }    
 }
