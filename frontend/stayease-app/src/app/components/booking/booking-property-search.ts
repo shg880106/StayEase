@@ -17,9 +17,11 @@ export class BookingPropertySearchComponent {
   maxGuests = signal<number | null>(null);
   minPrice = signal<number | null>(null);
   maxPrice = signal<number | null>(null);
+  checkInDate = signal<string | null>(null);
+  checkOutDate = signal<string | null>(null);
 
   hasActiveFilters = computed(() =>
-    !!this.selectedLocation() || !!this.minGuests() || !!this.maxPrice()
+    !!this.selectedLocation() || !!this.minGuests() || !!this.maxGuests() || !!this.minPrice() || !!this.maxPrice() || !!this.checkInDate() || !!this.checkOutDate()
   );
 
   locations = computed(() =>
@@ -33,6 +35,8 @@ export class BookingPropertySearchComponent {
       maxGuests: this.maxGuests(),
       minPrice: this.minPrice(),
       maxPrice: this.maxPrice(),
+      checkInDate: this.checkInDate(),
+      checkOutDate: this.checkOutDate(),
     });
   }
 
@@ -42,6 +46,8 @@ export class BookingPropertySearchComponent {
     this.maxGuests.set(null);
     this.minPrice.set(null);
     this.maxPrice.set(null);
-    this.filtersApplied.emit({ location: '', minGuests: null, maxGuests: null, minPrice: null, maxPrice: null });
+    this.checkInDate.set(null);
+    this.checkOutDate.set(null);
+    this.filtersApplied.emit({ location: '', minGuests: null, maxGuests: null, minPrice: null, maxPrice: null, checkInDate: null, checkOutDate: null });
   }
 }

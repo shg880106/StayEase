@@ -28,7 +28,9 @@ public class PropertyRepository : IPropertyRepository
 
     public async Task<List<Property>> GetPropertiesAsync()
     {
-        return await _dbContext.Properties.ToListAsync();
+        return await _dbContext.Properties
+            .Where(p => !p.IsDeleted)
+            .ToListAsync();
     }
 
     public async Task<Property> CreatePropertyAsync(Property property)
@@ -43,7 +45,10 @@ public class PropertyRepository : IPropertyRepository
         var property = await _dbContext.Properties.FindAsync(propertyId);
         if (property != null)
         {
-            _dbContext.Properties.Remove(property);
+            // Soft delete instead of hard delete
+            property.IsDeleted = true;
+            property.DeletedAt = DateTime.UtcNow;
+            _dbContext.Properties.Update(property);
             await _dbContext.SaveChangesAsync();
         }
         else
@@ -58,5 +63,13 @@ public class PropertyRepository : IPropertyRepository
         _dbContext.Properties.Update(propertyRequest);
         await _dbContext.SaveChangesAsync();
         return propertyRequest;
+    }
+
+    public async Task<List<Property>> GetPropertiesByOwnerIdAsync(Guid ownerId)
+    {
+        return await _dbContext.Properties
+            .AsNoTracking()
+            .Where(p => p.OwnerID == ownerId && !p.IsDeleted)
+            .ToListAsync();
     }
 }

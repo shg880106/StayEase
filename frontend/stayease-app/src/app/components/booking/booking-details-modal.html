@@ -1,0 +1,96 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+     (click)="close()">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+       (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h2 class="text-lg font-bold text-gray-900">Booking Details</h2>
+      <button (click)="close()" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="flex justify-center items-center py-16">
+        <svg class="animate-spin w-7 h-7 text-rose-500" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+        </svg>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (!loading() && error()) {
+      <div class="px-6 py-8 text-sm text-red-600 text-center">{{ error() }}</div>
+    }
+
+    <!-- Content -->
+    @if (!loading() && details(); as d) {
+      <div class="px-6 py-5 flex flex-col gap-5">
+
+        <!-- Property image -->
+        @if (d.property.imageUrl) {
+          <img [src]="d.property.imageUrl" [alt]="d.property.title"
+               class="w-full h-44 object-cover rounded-xl"/>
+        }
+
+        <!-- Property info -->
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Property</p>
+          <h3 class="text-base font-bold text-gray-900">{{ d.property.title }}</h3>
+          <div class="flex items-center gap-1 text-gray-400 text-xs mb-2">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+            </svg>
+            {{ d.property.location }}
+          </div>
+          <p class="text-sm text-gray-500 mt-1">{{ d.property.description }}</p>
+          <p class="text-sm font-semibold text-gray-700 mt-1">${{ d.property.pricePerNight.toFixed(2) }} / night</p>
+        </div>
+
+        <!-- Booking info -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-gray-50 rounded-xl p-3">
+            <p class="text-xs text-gray-400 mb-0.5">Check-in</p>
+            <p class="text-sm font-semibold text-gray-800">{{ formatDate(d.startDate) }}</p>
+          </div>
+          <div class="bg-gray-50 rounded-xl p-3">
+            <p class="text-xs text-gray-400 mb-0.5">Check-out</p>
+            <p class="text-sm font-semibold text-gray-800">{{ formatDate(d.endDate) }}</p>
+          </div>
+          <div class="bg-gray-50 rounded-xl p-3">
+            <p class="text-xs text-gray-400 mb-0.5">Total price</p>
+            <p class="text-sm font-bold text-gray-900">${{ d.totalPrice.toFixed(2) }}</p>
+          </div>
+          <div class="bg-gray-50 rounded-xl p-3">
+            <p class="text-xs text-gray-400 mb-0.5">Status</p>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full"
+                  [ngClass]="statusClass(d.bookingStatus)">
+              {{ statusLabel(d.bookingStatus) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Person info (Host or Guest) -->
+        <div class="border-t border-gray-100 pt-4">
+          <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">{{ d.person.label }}</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-rose-100 text-rose-500 text-sm font-bold flex items-center justify-center shrink-0">
+              {{ d.person.name.charAt(0).toUpperCase() }}
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-900">{{ d.person.name }}</p>
+              <p class="text-xs text-gray-400">{{ d.person.email }}</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    }
+
+  </div>
+</div>

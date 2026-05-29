@@ -10,6 +10,55 @@ export interface BookingResponse {
   totalPrice: number;
 }
 
+export interface MyBooking {
+  bookingID: string;
+  propertyID: string;
+  userID: string;
+  startDate: string;
+  endDate: string;
+  totalPrice: number;
+  bookingStatus: number;
+}
+
+export interface BookingDetails {
+  bookingID: string;
+  startDate: string;
+  endDate: string;
+  totalPrice: number;
+  bookingStatus: number;
+  property: PropertyDetails;
+  owner: OwnerDetails;
+}
+
+export interface PropertyDetails {
+  propertyID: string;
+  title: string;
+  location: string;
+  description: string;
+  pricePerNight: number;
+  imageUrl?: string;
+}
+
+export interface OwnerDetails {
+  name: string;
+  email: string;
+}
+
+export interface BookingDetailsForOwnerDto {
+  bookingID: string;
+  startDate: string;
+  endDate: string;
+  totalPrice: number;
+  bookingStatus: number;
+  property: PropertyDetails;
+  guest: GuestDetails;
+}
+
+export interface GuestDetails {
+  name: string;
+  email: string;
+}
+
 
 
 

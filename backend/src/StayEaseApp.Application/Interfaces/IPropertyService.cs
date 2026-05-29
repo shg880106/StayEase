@@ -14,4 +14,5 @@ public interface IPropertyService
     Task DeletePropertyAsync(Guid propertyId);
     Task<PropertyResponseDto> UpdatePropertyAsync(Guid propertyId, UpdatePropertyRequestDto propertyRequest);
     Task<List<PropertyResponseDto>> GetPropertiesSearchFiltersAsync(PropertySearchFiltersDto filters);
+    Task<List<PropertyResponseDto>> GetPropertiesByOwnerIdAsync(Guid ownerId);
 }

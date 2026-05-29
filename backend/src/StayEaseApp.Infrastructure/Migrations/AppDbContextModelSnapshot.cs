@@ -62,12 +62,18 @@ namespace StayEaseApp.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Location")
                         .IsRequired()
@@ -159,7 +165,7 @@ namespace StayEaseApp.Infrastructure.Migrations
                     b.HasOne("StayEaseApp.Domain.Entities.Property", "Property")
                         .WithMany("Bookings")
                         .HasForeignKey("PropertyID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("StayEaseApp.Domain.Entities.User", "User")

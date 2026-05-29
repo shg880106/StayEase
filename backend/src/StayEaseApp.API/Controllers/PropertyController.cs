@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StayEaseApp.Application.DTOs;
 using StayEaseApp.Application.Interfaces;
 using StayEaseApp.Application.Services;
+using System.Security.Claims;
 
 namespace StayEaseApp.API.Controllers;
 
@@ -38,7 +40,7 @@ public class PropertyController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new { message = ex.Message });
         }
     }
 
@@ -68,50 +70,71 @@ public class PropertyController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new { message = ex.Message });
         }
     }
 
     /// <summary>
-    /// Create a new property with the provided details
+    /// Create a new property (requires authentication)
     /// </summary>
     /// <returns>
     /// Returns one of the following HTTP status codes:
     /// <list type="bullet">
     ///   <item><description>201 Created - Property created successfully</description></item>
     ///   <item><description>400 Bad Request - Invalid input data or property validation failed</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated</description></item>
     /// </list>
     /// </returns>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(typeof(PropertyResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> CreateProperty([FromBody] CreatePropertyRequestDto propertyRequest)
     {
         try
         {
+            // Extract UserID from JWT token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            // Override the OwnerID with the authenticated user's ID
+            propertyRequest.OwnerID = userId;
+
             var createdProperty = await _propertyService.CreatePropertyAsync(propertyRequest);
 
             return CreatedAtAction(nameof(GetPropertyById), new { propertyId = createdProperty.PropertyID }, createdProperty);
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new { message = ex.Message });
         }
     }
 
     /// <summary>
-    /// Delete a property with the provided details
+    /// Delete a property (requires authentication and ownership)
     /// </summary>
     /// <returns>
     /// Returns one of the following HTTP status codes:
     /// <list type="bullet">
     ///   <item><description>200 Ok - Property deleted successfully</description></item>
     ///   <item><description>400 Bad Request - Invalid input data or property validation failed</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated</description></item>
+    ///   <item><description>403 Forbidden - User does not own this property</description></item>
+    ///   <item><description>404 Not Found - Property not found</description></item>
     /// </list>
     /// </returns>
+    [Authorize]
     [HttpDelete("{propertyId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProperty(Guid propertyId)
     {
         try
@@ -119,41 +142,78 @@ public class PropertyController : ControllerBase
             var property = await _propertyService.GetPropertyByIdAsync(propertyId);
             if (property == null)
             {
-                return NotFound($"Property with ID {propertyId} not found.");
+                return NotFound(new { message = $"Property with ID {propertyId} not found." });
+            }
+
+            // Optional: Verify the authenticated user owns the property
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            if (property.OwnerID != userId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = "You do not have permission to delete this property. Only the property owner can delete it." });
             }
 
             await _propertyService.DeletePropertyAsync(propertyId);
-            return Ok($"Property with ID {propertyId} deleted successfully.");
+            return Ok(new { message = "Property deleted successfully" });
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new { message = ex.Message });
         }
     }
 
     /// <summary>
-    /// Update a property with the provided details
+    /// Update a property (requires authentication)
     /// </summary>
     /// <returns>
     /// Returns one of the following HTTP status codes:
     /// <list type="bullet">
     ///   <item><description>200 Ok - Property updated successfully</description></item>
     ///   <item><description>400 Bad Request - Invalid input data or property validation failed</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated</description></item>
+    ///   <item><description>403 Forbidden - User does not own this property</description></item>
+    ///   <item><description>404 Not Found - Property not found</description></item>
     /// </list>
     /// </returns>
+    [Authorize]
     [HttpPut("{propertyId}")]
     [ProducesResponseType(typeof(PropertyResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProperty(Guid propertyId, [FromBody] UpdatePropertyRequestDto propertyRequest)
     {
         try
         {
+            var property = await _propertyService.GetPropertyByIdAsync(propertyId);
+            if (property == null)
+            {
+                return NotFound(new { message = $"Property with ID {propertyId} not found." });
+            }
+
+            // Verify the authenticated user owns the property
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            if (property.OwnerID != userId)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = "You do not have permission to update this property. Only the property owner can update it." });
+            }
+
             var updatedProperty = await _propertyService.UpdatePropertyAsync(propertyId, propertyRequest);
             return Ok(updatedProperty);
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new { message = ex.Message });
         }
     }
 
@@ -168,6 +228,13 @@ public class PropertyController : ControllerBase
     ///   <item><description>400 Bad Request - Invalid input data or property validation failed</description></item>
     /// </list>
     /// </returns>
+    /// <remarks>
+    /// Sample request with date availability:
+    ///
+    ///     GET /api/Property/search/filter?Location=Miami&amp;CheckInDate=2026-06-01&amp;CheckOutDate=2026-06-07
+    ///
+    /// This will return only properties that are available (no confirmed bookings) for the specified date range.
+    /// </remarks>
     [HttpGet("search/filter")]
     [ProducesResponseType(typeof(List<PropertyResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -180,7 +247,44 @@ public class PropertyController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get all properties owned by the authenticated user
+    /// </summary>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>200 Ok - List of properties owned by the user in response body</description></item>
+    ///   <item><description>400 Bad Request - Invalid input data or property validation failed</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated</description></item>
+    /// </list>
+    /// </returns>
+    [Authorize]
+    [HttpGet("my-properties")]
+    [ProducesResponseType(typeof(List<PropertyResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetMyProperties()
+    {
+        try
+        {
+            // Extract UserID from JWT token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            var properties = await _propertyService.GetPropertiesByOwnerIdAsync(userId);
+            return Ok(properties);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
     }
 }

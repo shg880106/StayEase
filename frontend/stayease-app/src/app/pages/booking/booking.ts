@@ -7,19 +7,13 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
+
+import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
 import { PropertyService } from '../../services/property.service';
 import { BookingResponse } from '../../models/booking.model';
 import { Property, PropertySearchFilters } from '../../models/property.model';
 import { BookingPropertySearchComponent } from '../../components/booking/booking-property-search';
-
-const GUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function guidValidator(control: AbstractControl): ValidationErrors | null {
-  if (!control.value) return null;
-  return GUID_PATTERN.test(control.value) ? null : { invalidGuid: true };
-}
 
 function dateRangeValidator(control: AbstractControl): ValidationErrors | null {
   const start = control.get('startDate')?.value;
@@ -39,6 +33,7 @@ export class BookingComponent implements OnInit {
   @ViewChild('formSection') formSection!: ElementRef;
 
   private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
   private bookingService = inject(BookingService);
   private propertyService = inject(PropertyService);
 
@@ -55,7 +50,6 @@ export class BookingComponent implements OnInit {
 
   bookingForm = this.fb.group(
     {
-      userID: ['', [Validators.required, guidValidator]],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
     },
@@ -72,16 +66,8 @@ export class BookingComponent implements OnInit {
     });
   }
 
-  get userIDErrors() {
-    const ctrl = this.bookingForm.get('userID');
-    if (!ctrl?.touched) return null;
-    if (ctrl.errors?.['required']) return 'User ID is required.';
-    if (ctrl.errors?.['invalidGuid']) return 'Must be a valid UUID (e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6).';
-    return null;
-  }
-
   onFiltersApplied(filters: PropertySearchFilters): void {
-    const hasFilters = !!(filters.location || filters.minGuests || filters.maxGuests || filters.minPrice || filters.maxPrice);
+    const hasFilters = !!(filters.location || filters.minGuests || filters.maxGuests || filters.minPrice || filters.maxPrice || filters.checkInDate || filters.checkOutDate );
 
     if (!hasFilters) {
       this.filteredProperties.set(this.properties());
@@ -118,8 +104,14 @@ export class BookingComponent implements OnInit {
     this.bookingForm.markAllAsTouched();
     if (this.bookingForm.invalid || !this.selectedProperty()) return;
 
-    const { userID, startDate, endDate } = this.bookingForm.value;
+    const { startDate, endDate } = this.bookingForm.value;
+    const userID = this.authService.currentUser()?.userID;
     const property = this.selectedProperty()!;
+
+    if (!userID) {
+      this.bookingError.set('You must be logged in to make a booking.');
+      return;
+    }
 
     this.isLoading.set(true);
     this.bookingError.set(null);
@@ -128,7 +120,7 @@ export class BookingComponent implements OnInit {
     this.bookingService
       .createBooking({
         propertyID: property.propertyID,
-        userID: userID!,
+        userID,
         startDate: new Date(startDate!).toISOString(),
         endDate: new Date(endDate!).toISOString(),
       })
@@ -140,11 +132,21 @@ export class BookingComponent implements OnInit {
         },
         error: (err) => {
           this.bookingError.set(
-            typeof err.error === 'string' ? err.error : 'Something went wrong. Please try again.'
+            typeof err.error === 'string'
+              ? err.error
+              : err.error?.message ?? 'Something went wrong. Please try again.'
           );
+          this.bookingForm.reset();
           this.isLoading.set(false);
         },
       });
+  }
+
+  closeBookingPanel(): void {
+    this.selectedProperty.set(null);
+    this.bookingResult.set(null);
+    this.bookingError.set(null);
+    this.bookingForm.reset();
   }
 
   get nights(): number {
