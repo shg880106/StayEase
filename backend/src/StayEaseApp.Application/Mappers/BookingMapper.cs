@@ -12,5 +12,9 @@ namespace StayEaseApp.Application.Mappers;
 public partial class BookingMapper
 {
     [MapperIgnoreSource(nameof(Booking.Property))]
+    [MapperIgnoreSource(nameof(Booking.User))]
     public partial BookingResponseDto BookingToBookingResponseDto(Booking booking);
+
+    private ReviewSummaryDto? MapReview(Review? review) =>
+        review is null ? null : new ReviewSummaryDto { Rating = review.Rating, Comment = review.Comment };
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StayEaseApp.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,4 +16,5 @@ public class PropertyResponseDto
     public string Location { get; set; } = string.Empty;
     public int MaxGuests { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
+    public List<ReviewResponseDto>? Reviews { get; set; }
 }

@@ -16,13 +16,21 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
                .IsRequired();
 
         builder.HasOne(r => r.User)
-                .WithMany(u => u.Reviews)
-                .HasForeignKey(r => r.UserID)
-                .OnDelete(DeleteBehavior.NoAction);
+            .WithMany(u => u.Reviews)
+            .HasForeignKey(r => r.UserID)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(r => r.Property)
-                .WithMany(p => p.Reviews)
-                .HasForeignKey(r => r.PropertyID)
-                .OnDelete(DeleteBehavior.Cascade);
+            .WithMany(p => p.Reviews)
+            .HasForeignKey(r => r.PropertyID)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(r => r.Booking)
+            .WithOne(b => b.Review)
+            .HasForeignKey<Review>(r => r.BookingID)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(r => r.BookingID)
+            .IsUnique(); 
     }
 }

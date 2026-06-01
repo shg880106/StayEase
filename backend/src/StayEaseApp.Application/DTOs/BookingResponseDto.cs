@@ -1,4 +1,5 @@
-﻿using StayEaseApp.Domain.Enums;
+﻿using StayEaseApp.Domain.Entities;
+using StayEaseApp.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,4 +16,12 @@ public class BookingResponseDto
     public DateTime EndDate { get; set; }
     public decimal TotalPrice { get; set; }
     public Status BookingStatus { get; set; }
+    public bool CanBeReviewed { get; set; }
+    public ReviewSummaryDto? Review { get; set; }
+}
+
+public class ReviewSummaryDto
+{
+    public int Rating { get; set; }
+    public string Comment { get; set; } = string.Empty;
 }

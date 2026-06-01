@@ -195,6 +195,45 @@ public class BookingService : IBookingService
         return _mapper.BookingToBookingResponseDto(booking);
     }
 
+    public async Task<BookingResponseDto> FinishBookingAsync(Guid bookingId, Guid ownerId)
+    {
+        // 1. Get booking with property info
+        var booking = await _bookingRepository.GetByIdAsync(bookingId);
+
+        if (booking == null)
+            throw new Exception("Booking not found");
+
+        // 2. Get property to verify ownership
+        var property = await _propertyRepository.GetByIdAsync(booking.PropertyID);
+
+        if (property == null)
+            throw new Exception("Property not found");
+
+        // 3. Verify the requesting user is the property owner
+        if (property.OwnerID != ownerId)
+            throw new UnauthorizedAccessException("Only the property owner can finish bookings");
+
+        // 4. Verify booking is in Confirmed status
+        if (booking.BookingStatus == Status.Finished)
+            throw new InvalidOperationException("Booking is already finished");
+        if (booking.BookingStatus == Status.Pending)
+            throw new InvalidOperationException("Cannot finish a pending booking");
+        if (booking.BookingStatus == Status.Cancelled)
+            throw new InvalidOperationException("Cannot finish a cancelled booking");
+
+        if (booking.BookingStatus != Status.Confirmed)
+            throw new InvalidOperationException("Only confirmed bookings can be finished");
+
+        // 5. Update booking status to Finished
+        booking.BookingStatus = Status.Finished;
+
+        // 6. Save changes
+        await _bookingRepository.UpdateAsync(booking);
+
+        // Map to DTO
+        return _mapper.BookingToBookingResponseDto(booking);
+    }
+
     public async Task<List<BookingResponseDto>> GetPropertyBookingsAsync(Guid propertyId, Guid ownerId)
     {
         // 1. Verify property ownership

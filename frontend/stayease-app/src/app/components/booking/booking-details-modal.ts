@@ -25,13 +25,15 @@ export interface BookingDetailsModalData {
 const STATUS_LABELS: Record<number, string> = {
   1: 'Pending',
   2: 'Confirmed',
-  3: 'Cancelled',
+  3: 'Cancelled',  
+  4: 'Finished',
 };
 
 const STATUS_CLASSES: Record<number, string> = {
   1: 'bg-yellow-100 text-yellow-700',
   2: 'bg-green-100 text-green-700',
-  3: 'bg-red-100 text-red-600',
+  3: 'bg-red-100 text-red-600',  
+  4: 'bg-blue-100 text-blue-700',
 };
 
 @Component({
