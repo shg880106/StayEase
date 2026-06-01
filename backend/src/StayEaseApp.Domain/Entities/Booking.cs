@@ -17,12 +17,18 @@ public class Booking
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public decimal TotalPrice { get; set; }
-    public Status BookingStatus { get; set; } = Status.Pending;
+    public Status BookingStatus { get; set; } = Status.Pending;    
 
     // Navigation properties
     public User User { get; set; } = null!;
     public Property Property { get; set; } = null!;
     public Review? Review { get; set; } // 1:1
+
+    // Computed property
+    public bool CanBeReviewed =>
+        BookingStatus == Status.Finished
+        && Review == null
+        && EndDate < DateTime.UtcNow;
 
     private Booking() { }
 
@@ -47,13 +53,6 @@ public class Booking
         return StartDate < endDate && EndDate > startDate;
     }
     
-    public bool CanBeReviewed() 
-    { 
-        return BookingStatus == Status.Finished 
-            && Review == null
-            && EndDate < DateTime.UtcNow; 
-    }
-
     public bool IsFinishedAndPast()
     {
         return BookingStatus == Status.Finished && EndDate < DateTime.UtcNow;

@@ -54,6 +54,7 @@ public class BookingRepository : IBookingRepository
     {
         return await _dbContext.Bookings
             .Include(b => b.Property)
+            .Include(b => b.Review)
             .Where(b => b.UserID == userId)
             .OrderByDescending(b => b.StartDate)
             .ToListAsync();

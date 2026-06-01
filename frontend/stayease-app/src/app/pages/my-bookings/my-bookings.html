@@ -195,12 +195,27 @@
                     icon="pi pi-eye"
                     label="See Details"
                     size="small" />
-                  <p-button
+                  @if (booking.canBeReviewed) {
+                    <p-button
                     (click)="reviewBooking(booking.bookingID)"
                     severity="warn"
                     icon="pi pi-star"
                     label="Review"
                     size="small" />
+                  } @else if (booking.review) {
+                    <div class="mt-1 text-right">
+                      <div class="flex items-center justify-end gap-0.5 mb-1">
+                        @for (star of [1, 2, 3, 4, 5]; track star) {
+                          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"
+                               [class.text-yellow-400]="star <= booking.review!.rating"
+                               [class.text-gray-200]="star > booking.review!.rating">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                          </svg>
+                        }
+                      </div>
+                      <p class="text-xs text-gray-500 max-w-[180px] text-right leading-snug italic">&ldquo;{{ booking.review.comment }}&rdquo;</p>
+                    </div>
+                  }
                 </div>
               </div>
             }

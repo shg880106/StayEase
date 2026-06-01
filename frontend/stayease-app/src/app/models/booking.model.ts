@@ -10,6 +10,11 @@ export interface BookingResponse {
   totalPrice: number;
 }
 
+export interface BookingReviewSummary {
+  rating: number;
+  comment: string;
+}
+
 export interface MyBooking {
   bookingID: string;
   propertyID: string;
@@ -18,6 +23,8 @@ export interface MyBooking {
   endDate: string;
   totalPrice: number;
   bookingStatus: number;
+  canBeReviewed: boolean;
+  review?: BookingReviewSummary;
 }
 
 export interface BookingDetails {
