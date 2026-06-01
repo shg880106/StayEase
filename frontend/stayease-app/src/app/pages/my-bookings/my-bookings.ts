@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Button } from 'primeng/button';
 import { BookingService } from '../../services/booking.service';
 import { MyBooking, BookingDetails } from '../../models/booking.model';
@@ -10,12 +10,14 @@ const STATUS_LABELS: Record<number, string> = {
   1: 'Pending',
   2: 'Confirmed',
   3: 'Cancelled',
+  4: 'Finished',
 };
 
 const STATUS_CLASSES: Record<number, string> = {
   1: 'bg-yellow-100 text-yellow-700',
   2: 'bg-green-100 text-green-700',
   3: 'bg-red-100 text-red-600',
+  4: 'bg-blue-100 text-blue-700',
 };
 
 @Component({
@@ -25,6 +27,7 @@ const STATUS_CLASSES: Record<number, string> = {
 })
 export class MyBookingsComponent implements OnInit {
   private readonly bookingService = inject(BookingService);
+  private readonly router = inject(Router);
 
   readonly bookings = signal<MyBooking[]>([]);
   readonly loading = signal(true);
@@ -33,7 +36,7 @@ export class MyBookingsComponent implements OnInit {
   readonly pendingBookings = computed(() => this.bookings().filter(b => b.bookingStatus === 1));
   readonly confirmedBookings = computed(() => this.bookings().filter(b => b.bookingStatus === 2));
   readonly cancelledBookings = computed(() => this.bookings().filter(b => b.bookingStatus === 3));
-
+  readonly finishedBookings = computed(() => this.bookings().filter(b => b.bookingStatus === 4));
   readonly showDetailsModal = signal(false);
   readonly selectedDetails = signal<BookingDetailsModalData | null>(null);
   readonly detailsLoading = signal(false);
@@ -105,6 +108,10 @@ export class MyBookingsComponent implements OnInit {
         setTimeout(() => this.cancelErrorMessage.set(null), 4000);
       },
     });
+  }
+
+  reviewBooking(bookingID: string): void {
+    this.router.navigate(['/review'], { state: { bookingID } });
   }
 
   closeDetails(): void {

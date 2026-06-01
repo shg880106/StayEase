@@ -14,7 +14,7 @@ export class ReviewService {
     return this.http.get<Review[]>(`${this.apiUrl}/review/${reviewID}`);
   }
 
-  create(request: CreateReviewRequest): Observable<Review> {
+  createReview(request: CreateReviewRequest): Observable<Review> {
     return this.http.post<Review>(this.apiUrl, request);
   }
 
