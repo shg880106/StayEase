@@ -45,8 +45,10 @@ public class ReviewRepository : IReviewRepository
             .FirstOrDefaultAsync(r => r.ReviewID == reviewId);
     }
 
-    public Task<Review> UpdateReviewAsync(Guid reviewId, Review reviewRequest)
+    public async Task<Review> UpdateReviewAsync(Guid reviewId, Review reviewRequest)
     {
-        throw new NotImplementedException();
+        _dbContext.Reviews.Update(reviewRequest);
+        await _dbContext.SaveChangesAsync();
+        return reviewRequest;
     }
 }

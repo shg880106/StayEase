@@ -16,7 +16,7 @@ public class ReviewService : IReviewService
     private readonly IReviewRepository _reviewRepository;
     private readonly ReviewMapper _mapper = new();
 
-    private const int MaxDaysAfterCheckout = 5;
+    private const int MaxDaysAfterCheckout = 30;
 
     public ReviewService(IBookingRepository bookingRepository, IReviewRepository reviewRepository)
     {
@@ -51,7 +51,7 @@ public class ReviewService : IReviewService
             throw new InvalidOperationException("You cannot review a booking that hasn't ended yet.");
         }
 
-        // Verify time window (optional: only 5 days after checkout)
+        // Verify time window (30 days after checkout)
         var daysSinceCheckout = (DateTime.UtcNow - booking.EndDate).Days;
         if (daysSinceCheckout > MaxDaysAfterCheckout)
         {
