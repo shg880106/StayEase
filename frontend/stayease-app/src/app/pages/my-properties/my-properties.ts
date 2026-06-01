@@ -13,12 +13,14 @@ const STATUS_LABELS: Record<number, string> = {
   1: 'Pending',
   2: 'Confirmed',
   3: 'Cancelled',
+  4: 'Finished',
 };
 
 const STATUS_CLASSES: Record<number, string> = {
   1: 'bg-yellow-100 text-yellow-700',
   2: 'bg-green-100 text-green-700',
   3: 'bg-red-100 text-red-600',
+  4: 'bg-blue-100 text-blue-700',
 };
 
 @Component({
@@ -57,6 +59,9 @@ export class MyPropertiesComponent implements OnInit {
   readonly confirmingId = signal<string | null>(null);
   readonly confirmSuccessId = signal<string | null>(null);
   readonly confirmErrorMessage = signal<string | null>(null);
+  readonly finishingId = signal<string | null>(null);
+  readonly finishSuccessId = signal<string | null>(null);
+  readonly finishErrorMessage = signal<string | null>(null);
   readonly cancelSuccessId = signal<string | null>(null);
   readonly cancelErrorMessage = signal<string | null>(null);
   readonly bookingCounts = signal<Map<string, number>>(new Map());
@@ -281,6 +286,25 @@ export class MyPropertiesComponent implements OnInit {
         this.confirmingId.set(null);
         this.confirmErrorMessage.set('Failed to confirm booking. Please try again.');
         setTimeout(() => this.confirmErrorMessage.set(null), 4000);
+      },
+    });
+  }
+
+  finishBooking(bookingID: string): void {
+    this.finishingId.set(bookingID);
+    this.bookingService.finishBooking(bookingID).subscribe({
+      next: () => {
+        this.propertyBookings.update(list =>
+          list.map(b => b.bookingID === bookingID ? { ...b, bookingStatus: 4 } : b)
+        );
+        this.finishingId.set(null);
+        this.finishSuccessId.set(bookingID);
+        setTimeout(() => this.finishSuccessId.set(null), 4000);
+      },
+      error: () => {
+        this.finishingId.set(null);
+        this.finishErrorMessage.set('Failed to finish booking. Please try again.');
+        setTimeout(() => this.finishErrorMessage.set(null), 4000);
       },
     });
   }

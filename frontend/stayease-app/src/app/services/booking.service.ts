@@ -29,6 +29,10 @@ export class BookingService {
     return this.http.request<BookingResponse>('PATCH', `${this.apiUrl}/${bookingID}/confirm`, {});
   }
 
+  finishBooking(bookingID: string): Observable<BookingResponse> {
+    return this.http.request<BookingResponse>('PATCH', `${this.apiUrl}/${bookingID}/finish`, {});
+  }
+
   getPropertyBookings(propertyID: string): Observable<MyBooking[]> {
     return this.http.get<MyBooking[]>(`${this.apiUrl}/property/${propertyID}`);
   }

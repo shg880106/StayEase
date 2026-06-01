@@ -15,5 +15,6 @@ public interface IBookingService
     Task<BookingDetailsForOwnerDto?> GetBookingDetailsForOwnerAsync(Guid bookingId, Guid ownerId);
     Task<BookingResponseDto> CancelBookingAsync(Guid bookingId, Guid userId);
     Task<BookingResponseDto> ConfirmBookingAsync(Guid bookingId, Guid ownerId);
+    Task<BookingResponseDto> FinishBookingAsync(Guid bookingId, Guid ownerId);
     Task<List<BookingResponseDto>> GetPropertyBookingsAsync(Guid propertyId, Guid ownerId);
 }
