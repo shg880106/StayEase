@@ -1,60 +1,26 @@
-import { Component, inject, signal, ElementRef, ViewChild, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators,
-  AbstractControl,
-  ValidationErrors,
-} from '@angular/forms';
 
-import { AuthService } from '../../services/auth.service';
-import { BookingService } from '../../services/booking.service';
 import { PropertyService } from '../../services/property.service';
-import { BookingResponse } from '../../models/booking.model';
 import { Property, PropertySearchFilters } from '../../models/property.model';
 import { BookingPropertySearchComponent } from '../../components/booking/booking-property-search';
-
-function dateRangeValidator(control: AbstractControl): ValidationErrors | null {
-  const start = control.get('startDate')?.value;
-  const end = control.get('endDate')?.value;
-  if (start && end && new Date(end) <= new Date(start)) {
-    return { dateRange: true };
-  }
-  return null;
-}
+import { PropertyReviewsModalComponent } from '../../components/booking/property-reviews-modal';
+import { BookingFormModalComponent } from '../../components/booking/booking-form-modal';
 
 @Component({
   selector: 'app-booking',
-  imports: [ReactiveFormsModule, DecimalPipe, BookingPropertySearchComponent],
+  imports: [DecimalPipe, BookingPropertySearchComponent, PropertyReviewsModalComponent, BookingFormModalComponent],
   templateUrl: './booking.html',
 })
 export class BookingComponent implements OnInit {
-  @ViewChild('formSection') formSection!: ElementRef;
-
-  private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
-  private bookingService = inject(BookingService);
   private propertyService = inject(PropertyService);
 
   properties = signal<Property[]>([]);
   filteredProperties = signal<Property[]>([]);
   propertiesError = signal<string | null>(null);
   isSearching = signal(false);
-  selectedProperty = signal<Property | null>(null);
-  bookingResult = signal<BookingResponse | null>(null);
-  bookingError = signal<string | null>(null);
-  isLoading = signal(false);
-
-  today = new Date().toISOString().split('T')[0];
-
-  bookingForm = this.fb.group(
-    {
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
-    },
-    { validators: dateRangeValidator }
-  );
+  bookingProperty = signal<Property | null>(null);
+  reviewsProperty = signal<Property | null>(null);
 
   ngOnInit(): void {
     this.propertyService.getAll().subscribe({
@@ -90,75 +56,26 @@ export class BookingComponent implements OnInit {
     });
   }
 
-  selectProperty(property: Property): void {
-    this.selectedProperty.set(property);
-    this.bookingResult.set(null);
-    this.bookingError.set(null);
-    this.bookingForm.reset();
-    setTimeout(() => {
-      this.formSection?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
+  openBooking(property: Property): void {
+    this.bookingProperty.set(property);
   }
 
-  onSubmit(): void {
-    this.bookingForm.markAllAsTouched();
-    if (this.bookingForm.invalid || !this.selectedProperty()) return;
-
-    const { startDate, endDate } = this.bookingForm.value;
-    const userID = this.authService.currentUser()?.userID;
-    const property = this.selectedProperty()!;
-
-    if (!userID) {
-      this.bookingError.set('You must be logged in to make a booking.');
-      return;
-    }
-
-    this.isLoading.set(true);
-    this.bookingError.set(null);
-    this.bookingResult.set(null);
-
-    this.bookingService
-      .createBooking({
-        propertyID: property.propertyID,
-        userID,
-        startDate: new Date(startDate!).toISOString(),
-        endDate: new Date(endDate!).toISOString(),
-      })
-      .subscribe({
-        next: (response) => {
-          this.bookingResult.set(response);
-          this.isLoading.set(false);
-          this.bookingForm.reset();
-        },
-        error: (err) => {
-          this.bookingError.set(
-            typeof err.error === 'string'
-              ? err.error
-              : err.error?.message ?? 'Something went wrong. Please try again.'
-          );
-          this.bookingForm.reset();
-          this.isLoading.set(false);
-        },
-      });
+  closeBooking(): void {
+    this.bookingProperty.set(null);
   }
 
-  closeBookingPanel(): void {
-    this.selectedProperty.set(null);
-    this.bookingResult.set(null);
-    this.bookingError.set(null);
-    this.bookingForm.reset();
+  openReviews(property: Property, event: Event): void {
+    event.stopPropagation();
+    this.reviewsProperty.set(property);
   }
 
-  get nights(): number {
-    const { startDate, endDate } = this.bookingForm.value;
-    if (!startDate || !endDate) return 0;
-    const diff = new Date(endDate).getTime() - new Date(startDate).getTime();
-    return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+  closeReviews(): void {
+    this.reviewsProperty.set(null);
   }
 
-  get estimatedTotal(): number {
-    const property = this.selectedProperty();
-    if (!property) return 0;
-    return this.nights * property.pricePerNight;
+  avgRating(property: Property): number {
+    const reviews = property.reviews;
+    if (!reviews?.length) return 0;
+    return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
   }
 }

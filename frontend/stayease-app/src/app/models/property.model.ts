@@ -1,3 +1,5 @@
+import { Review } from "./review.model";
+
 export interface Property {
   propertyID: string;
   userID: string;
@@ -7,6 +9,7 @@ export interface Property {
   location: string;
   maxGuests: number;
   imageUrl: string;
+  reviews: Review[];
 }
 
 export interface CreatePropertyRequest {

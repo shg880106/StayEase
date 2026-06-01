@@ -29,6 +29,7 @@ public class PropertyRepository : IPropertyRepository
     public async Task<List<Property>> GetPropertiesAsync()
     {
         return await _dbContext.Properties
+            .Include(p => p.Reviews)
             .Where(p => !p.IsDeleted)
             .ToListAsync();
     }
@@ -69,6 +70,7 @@ public class PropertyRepository : IPropertyRepository
     {
         return await _dbContext.Properties
             .AsNoTracking()
+            .Include(p => p.Reviews)
             .Where(p => p.OwnerID == ownerId && !p.IsDeleted)
             .ToListAsync();
     }

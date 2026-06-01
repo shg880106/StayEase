@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { Button } from 'primeng/button';
@@ -25,7 +26,7 @@ const STATUS_CLASSES: Record<number, string> = {
 
 @Component({
   selector: 'app-my-properties',
-  imports: [ReactiveFormsModule, NgClass, BookingDetailsModalComponent, Button],
+  imports: [ReactiveFormsModule, NgClass, BookingDetailsModalComponent, Button, DecimalPipe],
   templateUrl: './my-properties.html',
 })
 export class MyPropertiesComponent implements OnInit {
@@ -373,6 +374,12 @@ export class MyPropertiesComponent implements OnInit {
     const ms = new Date(end).getTime() - new Date(start).getTime();
     return Math.round(ms / (1000 * 60 * 60 * 24));
   }  
+
+  avgRating(property: Property): number {
+    const reviews = property.reviews;
+    if (!reviews?.length) return 0;
+    return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+  }
 
   private loadProperties(): void {
     this.propertyService.getMyProperties().subscribe({
