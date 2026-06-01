@@ -14,10 +14,27 @@ public partial class PropertyMapper
     // Ignore unmapped source members to resolve RMG020 diagnostics
     [MapperIgnoreSource(nameof(Property.Owner))]
     [MapperIgnoreSource(nameof(Property.Bookings))]
-    [MapperIgnoreSource(nameof(Property.Reviews))]
     // Map nullable ImageUrl to non-nullable target with fallback to empty string to resolve RMG089
     [MapProperty(nameof(Property.ImageUrl), nameof(PropertyResponseDto.ImageUrl))]
+    // Custom mapping for Reviews collection
+    [MapProperty(nameof(Property.Reviews), nameof(PropertyResponseDto.Reviews), Use = nameof(MapReviews))]
     public partial PropertyResponseDto PropertyToPropertyResponseDto(Property property);
 
     private string MapImageUrl(string? imageUrl) => imageUrl ?? string.Empty;
+
+    private List<ReviewResponseDto>? MapReviews(ICollection<Review> reviews)
+    {
+        if (reviews == null || !reviews.Any())
+            return null;
+
+        return reviews.Select(r => new ReviewResponseDto
+        {
+            ReviewID = r.ReviewID,
+            PropertyID = r.PropertyID,
+            UserID = r.UserID,
+            BookingID = r.BookingID,
+            Rating = r.Rating,
+            Comment = r.Comment
+        }).ToList();
+    }
 }

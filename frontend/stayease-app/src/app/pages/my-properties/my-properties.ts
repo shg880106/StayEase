@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { Button } from 'primeng/button';
@@ -13,17 +14,19 @@ const STATUS_LABELS: Record<number, string> = {
   1: 'Pending',
   2: 'Confirmed',
   3: 'Cancelled',
+  4: 'Finished',
 };
 
 const STATUS_CLASSES: Record<number, string> = {
   1: 'bg-yellow-100 text-yellow-700',
   2: 'bg-green-100 text-green-700',
   3: 'bg-red-100 text-red-600',
+  4: 'bg-blue-100 text-blue-700',
 };
 
 @Component({
   selector: 'app-my-properties',
-  imports: [ReactiveFormsModule, NgClass, BookingDetailsModalComponent, Button],
+  imports: [ReactiveFormsModule, NgClass, BookingDetailsModalComponent, Button, DecimalPipe],
   templateUrl: './my-properties.html',
 })
 export class MyPropertiesComponent implements OnInit {
@@ -57,6 +60,9 @@ export class MyPropertiesComponent implements OnInit {
   readonly confirmingId = signal<string | null>(null);
   readonly confirmSuccessId = signal<string | null>(null);
   readonly confirmErrorMessage = signal<string | null>(null);
+  readonly finishingId = signal<string | null>(null);
+  readonly finishSuccessId = signal<string | null>(null);
+  readonly finishErrorMessage = signal<string | null>(null);
   readonly cancelSuccessId = signal<string | null>(null);
   readonly cancelErrorMessage = signal<string | null>(null);
   readonly bookingCounts = signal<Map<string, number>>(new Map());
@@ -285,6 +291,25 @@ export class MyPropertiesComponent implements OnInit {
     });
   }
 
+  finishBooking(bookingID: string): void {
+    this.finishingId.set(bookingID);
+    this.bookingService.finishBooking(bookingID).subscribe({
+      next: () => {
+        this.propertyBookings.update(list =>
+          list.map(b => b.bookingID === bookingID ? { ...b, bookingStatus: 4 } : b)
+        );
+        this.finishingId.set(null);
+        this.finishSuccessId.set(bookingID);
+        setTimeout(() => this.finishSuccessId.set(null), 4000);
+      },
+      error: () => {
+        this.finishingId.set(null);
+        this.finishErrorMessage.set('Failed to finish booking. Please try again.');
+        setTimeout(() => this.finishErrorMessage.set(null), 4000);
+      },
+    });
+  }
+
   openBookingDetails(bookingID: string): void {
     this.selectedBookingDetails.set(null);
     this.bookingDetailsError.set(null);
@@ -349,6 +374,12 @@ export class MyPropertiesComponent implements OnInit {
     const ms = new Date(end).getTime() - new Date(start).getTime();
     return Math.round(ms / (1000 * 60 * 60 * 24));
   }  
+
+  avgRating(property: Property): number {
+    const reviews = property.reviews;
+    if (!reviews?.length) return 0;
+    return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+  }
 
   private loadProperties(): void {
     this.propertyService.getMyProperties().subscribe({

@@ -297,6 +297,56 @@ public class BookingController : ControllerBase
     }
 
     /// <summary>
+    /// Finishes a pending booking (Owner only)
+    /// </summary>
+    /// <param name="bookingId">The ID of the booking to finish</param>
+    /// <returns>
+    /// Returns one of the following HTTP status codes:
+    /// <list type="bullet">
+    ///   <item><description>200 OK - Booking successfully finished</description></item>
+    ///   <item><description>400 Bad Request - Booking cannot be finished (already finished, pending or cancelled, or invalid status)</description></item>
+    ///   <item><description>401 Unauthorized - User not authenticated or not authorized to finish this booking</description></item>
+    ///   <item><description>404 Not Found - Booking does not exist</description></item>
+    /// </list>
+    /// </returns>
+    [HttpPatch("{bookingId}/finish")]
+    [ProducesResponseType(typeof(BookingResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> FinishBooking(Guid bookingId)
+    {
+        try
+        {
+            // Extract UserID from JWT token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid or missing user authentication" });
+            }
+
+            // Finish booking (service validates ownership)
+            var response = await _bookingService.FinishBookingAsync(bookingId, userId);
+
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Get all bookings for a specific property (Owner only)
     /// </summary>
     /// <param name="propertyId">The ID of the property</param>

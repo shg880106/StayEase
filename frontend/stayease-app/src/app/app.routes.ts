@@ -5,6 +5,7 @@ import { LoginComponent } from './pages/login/login';
 import { RegisterComponent } from './pages/register/register';
 import { MyPropertiesComponent } from './pages/my-properties/my-properties';
 import { MyBookingsComponent } from './pages/my-bookings/my-bookings';
+import { ReviewComponent } from './pages/review/review';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'my-properties', component: MyPropertiesComponent },
   { path: 'my-bookings', component: MyBookingsComponent },
+  { path: 'review', component: ReviewComponent },
   { path: '**', redirectTo: '' },
 ];
