@@ -2,6 +2,7 @@
 using StayEaseApp.E2ETests.Configuration;
 using StayEaseApp.E2ETests.Infrastructure;
 using StayEaseApp.E2ETests.Pages;
+using StayEaseApp.E2ETests.TestData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +29,8 @@ public class LoginTests : E2ETestBase
     public async Task LoginInToTheApplication_WithValidCredentials_ShowsUserMenu()
     {
         await _loginPage.NavigateToLoginAsync();
-        await _loginPage.FillEmailAsync(TestEnvironment.ValidUserEmail);
-        await _loginPage.FillPasswordAsync(TestEnvironment.ValidUserPassword);
+        await _loginPage.FillEmailAsync(TestUsers.ValidUserEmail);
+        await _loginPage.FillPasswordAsync(TestUsers.ValidUserPassword);
 
         await _loginPage.ToggleShowPasswordAsync();
         await Expect(_loginPage.PasswordField).ToHaveAttributeAsync("type", "text");
@@ -39,12 +40,12 @@ public class LoginTests : E2ETestBase
 
         await _loginPage.SubmitAsync();
 
-        var userMenuButton = _loginPage.UserMenuButton(TestEnvironment.ValidUserDisplayName);
+        var userMenuButton = _loginPage.UserMenuButton(TestUsers.ValidUserDisplayName);
         await Expect(userMenuButton).ToBeVisibleAsync();
 
-        await _loginPage.OpenUserMenuAsync(TestEnvironment.ValidUserDisplayName);
+        await _loginPage.OpenUserMenuAsync(TestUsers.ValidUserDisplayName);
 
-        await Expect(_loginPage.UserMenu).ToContainTextAsync(TestEnvironment.ValidUserDisplayName);
+        await Expect(_loginPage.UserMenu).ToContainTextAsync(TestUsers.ValidUserDisplayName);
     }
 
     [Test]
@@ -53,8 +54,8 @@ public class LoginTests : E2ETestBase
     public async Task LoginInToTheApplication_WithInvalidCredentials_ShowsValidationError()
     {
         await _loginPage.NavigateToLoginAsync();
-        await _loginPage.FillEmailAsync(TestEnvironment.InvalidUserEmail);
-        await _loginPage.FillPasswordAsync(TestEnvironment.InvalidUserPassword);
+        await _loginPage.FillEmailAsync(TestUsers.InvalidUserEmail);
+        await _loginPage.FillPasswordAsync(TestUsers.InvalidUserPassword);
 
         await _loginPage.SubmitAsync();
 

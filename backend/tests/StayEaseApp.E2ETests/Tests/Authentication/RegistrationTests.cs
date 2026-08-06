@@ -2,6 +2,7 @@
 using StayEaseApp.E2ETests.Configuration;
 using StayEaseApp.E2ETests.Infrastructure;
 using StayEaseApp.E2ETests.Pages;
+using StayEaseApp.E2ETests.TestData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,14 +32,14 @@ public class RegistrationTests : E2ETestBase
     public async Task RegisterNewUser_WithValidData_ShowsSuccessUserName()
     {
         await _registerPage.NavigateToRegisterAsync();
-        await _registerPage.FillFullNameAsync(TestEnvironment.ValidUserToRegisterFullName);
+        await _registerPage.FillFullNameAsync(TestUsers.ValidUserToRegisterFullName);
         await _registerPage.FillEmailAsync(_generatedEmail);
-        await _registerPage.FillPasswordAsync(TestEnvironment.ValidUserToRegisterPassword);
-        await _registerPage.FillConfirmPasswordAsync(TestEnvironment.ValidUserToRegisterConfirmPassword);
+        await _registerPage.FillPasswordAsync(TestUsers.ValidUserToRegisterPassword);
+        await _registerPage.FillConfirmPasswordAsync(TestUsers.ValidUserToRegisterConfirmPassword);
 
         await _registerPage.CreateAsync();
 
-        var userMenuButton = _registerPage.UserMenuButton(TestEnvironment.ValidUserToRegisterDisplayName);
+        var userMenuButton = _registerPage.UserMenuButton(TestUsers.ValidUserToRegisterDisplayName);
         await Expect(userMenuButton).ToBeVisibleAsync();
 
         // Negative-space checks: ensure the registration form/page has actually
@@ -53,10 +54,10 @@ public class RegistrationTests : E2ETestBase
     public async Task RegisterUser_WithExistingEmail_ShowsValidationError()
     {
         await _registerPage.NavigateToRegisterAsync();
-        await _registerPage.FillFullNameAsync(TestEnvironment.ValidUserToRegisterFullName);
-        await _registerPage.FillEmailAsync(TestEnvironment.ValidUserEmail);
-        await _registerPage.FillPasswordAsync(TestEnvironment.ValidUserToRegisterPassword);
-        await _registerPage.FillConfirmPasswordAsync(TestEnvironment.ValidUserToRegisterConfirmPassword);
+        await _registerPage.FillFullNameAsync(TestUsers.ValidUserToRegisterFullName);
+        await _registerPage.FillEmailAsync(TestUsers.ValidUserEmail);
+        await _registerPage.FillPasswordAsync(TestUsers.ValidUserToRegisterPassword);
+        await _registerPage.FillConfirmPasswordAsync(TestUsers.ValidUserToRegisterConfirmPassword);
 
         await _registerPage.CreateAsync();
 
@@ -69,10 +70,10 @@ public class RegistrationTests : E2ETestBase
     public async Task RegisterUser_WithPasswordsNotMatch_ShowsValidationError()
     {
         await _registerPage.NavigateToRegisterAsync();
-        await _registerPage.FillFullNameAsync(TestEnvironment.ValidUserToRegisterFullName);
+        await _registerPage.FillFullNameAsync(TestUsers.ValidUserToRegisterFullName);
         await _registerPage.FillEmailAsync(_generatedEmail);
-        await _registerPage.FillPasswordAsync(TestEnvironment.ValidUserToRegisterPassword);
-        await _registerPage.FillConfirmPasswordAsync(TestEnvironment.InValidUserToRegisterConfirmPassword);
+        await _registerPage.FillPasswordAsync(TestUsers.ValidUserToRegisterPassword);
+        await _registerPage.FillConfirmPasswordAsync(TestUsers.InValidUserToRegisterConfirmPassword);
 
         await _registerPage.CreateAsync();
 
