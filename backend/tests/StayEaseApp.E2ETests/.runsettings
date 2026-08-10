@@ -5,7 +5,7 @@
 		<Parameter name="ApiUrl" value="https://localhost:7172" />
 	</TestRunParameters>
 	<Playwright>
-		<BrowserName>firefox</BrowserName>
+		<BrowserName>chromium</BrowserName>
 		<LaunchOptions>
 			<Headless>true</Headless>
 		</LaunchOptions>
