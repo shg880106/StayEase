@@ -1,26 +1,21 @@
+name: E2E-Tests
 resources:
-  resources:
-    pipelines:
-    - pipeline: buildPipelineE2E        
-    source: 'StayEase (backend)' 
+  pipelines:
+  - pipeline: buildPipelineE2E
+    source: 'StayEase (backend)'
     trigger:
-        branches:
+      branches:
         include:
         - main
-
-trigger: none 
-
-
+trigger: none
 pool:
   name: Default  # self-hosted agent pool name
-
 steps:
 - task: UseDotNet@2
   inputs:
     packageType: sdk
     version: '8.0.x'
   displayName: 'Use .NET SDK'
-
 - script: dotnet build --configuration Release
   displayName: 'Build'
   workingDirectory: backend/tests/StayEaseApp.E2ETests
