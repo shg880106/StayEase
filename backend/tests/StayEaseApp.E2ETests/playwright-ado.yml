@@ -1,10 +1,10 @@
 resources:
   resources:
-  pipelines:
-  - pipeline: buildPipelineE2E        
+    pipelines:
+    - pipeline: buildPipelineE2E        
     source: 'StayEase (backend)' 
     trigger:
-      branches:
+        branches:
         include:
         - main
 
