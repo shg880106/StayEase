@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 namespace StayEaseApp.E2ETests.Infrastructure;
 public class E2ETestBase : PageTest
 {
-    protected const string BaseUrl = TestEnvironment.BaseUrl;
+    protected static readonly string BaseUrl = TestEnvironment.GetBaseUrl();
+    protected static readonly string ApiUrl = TestEnvironment.GetApiUrl();
 
     [SetUp]
     public async Task BaseSetUpAsync()

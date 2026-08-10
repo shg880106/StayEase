@@ -25,7 +25,7 @@ public class HomeTests : E2ETestBase
     [Test]
     public async Task HomePageCanBeOpened()
     {
-        var response = await Page.GotoAsync(TestEnvironment.BaseUrl);
+        var response = await Page.GotoAsync(TestEnvironment.GetBaseUrl());
 
         Assert.That(
             response,
@@ -37,7 +37,7 @@ public class HomeTests : E2ETestBase
             Is.True,
             $"The homepage returned HTTP status {response.Status}.");
 
-        await Expect(Page).ToHaveURLAsync(TestEnvironment.BaseUrl);
+        await Expect(Page).ToHaveURLAsync(TestEnvironment.GetBaseUrl());
         await Expect(_homePage.HomeComponent).ToBeVisibleAsync();
         await Expect(_homePage.HomeComponent).ToContainTextAsync("Property Booking Platform");
         await Expect(_homePage.HeroHeading).ToContainTextAsync("Find your perfect stay, effortlessly.");
@@ -46,7 +46,7 @@ public class HomeTests : E2ETestBase
     [Test]
     public async Task HomePage_ShowsSignInAndRegisterLinks()
     {
-        await Page.GotoAsync(TestEnvironment.BaseUrl);
+        await Page.GotoAsync(TestEnvironment.GetBaseUrl());
 
         await Expect(_homePage.SignInLink).ToBeVisibleAsync();
         await Expect(_homePage.SignInLink).ToBeEnabledAsync();
