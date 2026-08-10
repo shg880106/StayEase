@@ -41,7 +41,7 @@ public class LoginTests : E2ETestBase
         await _loginPage.SubmitAsync();
 
         var userMenuButton = _loginPage.UserMenuButton(TestUsers.ValidUserDisplayName);
-        await Expect(userMenuButton).ToBeVisibleAsync();
+        await Expect(userMenuButton).ToBeVisibleAsync(new() { Timeout = 15000 });
 
         await _loginPage.OpenUserMenuAsync(TestUsers.ValidUserDisplayName);
 

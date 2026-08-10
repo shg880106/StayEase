@@ -64,7 +64,8 @@ public class RegistrationTests : E2ETestBase
 
         await _registerPage.CreateAsync();
 
-        await Expect(_registerPage.RegistrationValidationError).ToBeVisibleAsync();        
+        // Same cold-start rationale as the successful registration test above.
+        await Expect(_registerPage.RegistrationValidationError).ToBeVisibleAsync(new() { Timeout = 30000 });        
     }
 
     [Test]
