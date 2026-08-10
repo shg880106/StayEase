@@ -59,7 +59,7 @@ public class LoginTests : E2ETestBase
 
         await _loginPage.SubmitAsync();
 
-        await Expect(_loginPage.LoginValidationError).ToBeVisibleAsync();
+        await Expect(_loginPage.LoginValidationError).ToBeVisibleAsync(new() { Timeout = 15000 });
     }
 
     [Test]

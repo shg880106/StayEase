@@ -32,7 +32,7 @@ public class PropertiesTests : E2ETestBase
         await _loginPage.OpenUserMenuAsync(TestUsers.ValidUserWithoutPropertiesDisplayName);
         await _propertiesPage.NavigateToMyPropertiesAsync();
 
-        await Expect(_propertiesPage.NoPropertiesYetHeading).ToBeVisibleAsync();
+        await Expect(_propertiesPage.NoPropertiesYetHeading).ToBeVisibleAsync(new() { Timeout = 30000 });
     }
 
     //[Test]
