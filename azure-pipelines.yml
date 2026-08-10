@@ -42,7 +42,11 @@ stages:
         configuration: '$(buildConfiguration)'
 
     - task: VSTest@2
+      displayName: 'Run Unit Tests'
       inputs:
+        testAssemblyVer2: |
+          **\bin\$(buildConfiguration)\**\StayEaseApp.Tests.dll
+          !**\obj\**
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
 
