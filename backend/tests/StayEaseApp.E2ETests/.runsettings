@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+	<TestRunParameters>
+		<Parameter name="BaseUrl" value="https://localhost:4200" />
+		<Parameter name="ApiUrl" value="https://localhost:7172" />
+	</TestRunParameters>
+	<Playwright>
+		<BrowserName>firefox</BrowserName>
+		<LaunchOptions>
+			<Headless>true</Headless>
+		</LaunchOptions>
+	</Playwright>
+</RunSettings>
