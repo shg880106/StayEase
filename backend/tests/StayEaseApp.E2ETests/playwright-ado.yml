@@ -18,7 +18,7 @@ steps:
   displayName: 'Install Playwright Browsers'
   inputs:
     targetType: inline
-    script: ./bin/Debug/net8.0/playwright.ps1 install --with-deps
+    script: ./bin/Release/net8.0/playwright.ps1 install --with-deps
     workingDirectory: backend/tests/StayEaseApp.E2ETests
 - script: dotnet test -s ./.runsettings --configuration Release
   displayName: 'Run Tests'
