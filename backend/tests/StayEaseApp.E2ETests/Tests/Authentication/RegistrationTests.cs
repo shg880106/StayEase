@@ -40,7 +40,10 @@ public class RegistrationTests : E2ETestBase
         await _registerPage.CreateAsync();
 
         var userMenuButton = _registerPage.UserMenuButton(TestUsers.ValidUserToRegisterDisplayName);
-        await Expect(userMenuButton).ToBeVisibleAsync();
+        // Free-tier Azure SQL databases can be paused and need extra time to
+        // resume (cold start) on the first request, so allow a longer timeout
+        // than the Playwright default (5s) when running against remote/CI environments.
+        await Expect(userMenuButton).ToBeVisibleAsync(new() { Timeout = 30000 });
 
         // Negative-space checks: ensure the registration form/page has actually
         // been navigated away from, not just hidden behind the user menu.
