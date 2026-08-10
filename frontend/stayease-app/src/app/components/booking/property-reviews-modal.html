@@ -17,7 +17,7 @@
     </div>
 
     <!-- Summary bar -->
-    @if (property().reviews?.length) {
+    @if (property().reviews.length) {
       <div class="px-6 py-4 border-b border-gray-100 shrink-0 flex items-center gap-4 bg-gray-50">
         <div class="text-center">
           <p class="text-3xl font-bold text-gray-900">{{ avgRating | number:'1.1-1' }}</p>
@@ -40,7 +40,7 @@
     <!-- Reviews list -->
     <div class="overflow-y-auto flex-1 px-6 py-4 flex flex-col gap-4">
 
-      @if (!property().reviews?.length) {
+      @if (!property().reviews.length) {
         <div class="flex flex-col items-center justify-center py-16 text-center">
           <div class="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mb-4">
             <svg class="w-7 h-7 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
