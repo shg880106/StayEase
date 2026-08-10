@@ -5,7 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace StayEaseApp.E2ETests.Configuration;
-public class TestEnvironment
+public static class TestEnvironment
 {
-    public const string BaseUrl = "http://localhost:4200/";
+    public static string BaseUrl =>
+        Environment.GetEnvironmentVariable("TEST_BASEURL") ?? "http://localhost:4200/";
+
+    public static string ApiUrl =>
+        Environment.GetEnvironmentVariable("TEST_APIURL") ?? "http://localhost:7172/";
 }
