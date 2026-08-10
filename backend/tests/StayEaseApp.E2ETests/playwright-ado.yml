@@ -1,5 +1,14 @@
-trigger:
-- main
+resources:
+  pipelines:
+  - pipeline: buildPipelineE2E        # alias arbitrario
+    source: 'StayEase (backend)' # nombre exacto del pipeline que debe correr primero
+    trigger:
+      branches:
+        include:
+        - main
+
+# trigger:
+# - main
 
 pool:
   name: Default  # self-hosted agent pool name
