@@ -38,7 +38,9 @@ public class PropertiesTests : E2ETestBase
         await _loginPage.OpenUserMenuAsync(TestUsers.ValidUserWithoutPropertiesDisplayName);
         await _propertiesPage.NavigateToMyPropertiesAsync();
 
-        await Expect(_propertiesPage.NoPropertiesYetHeading).ToBeVisibleAsync(new() { Timeout = 30000 });
+        // Azure free-tier App Service/SQL can cold-start, so allow more time
+        // than the Playwright default (5s) when running against remote/CI environments.
+        await Expect(_propertiesPage.NoPropertiesYetHeading).ToBeVisibleAsync(new() { Timeout = 45000 });
     }
 
     //[Test]

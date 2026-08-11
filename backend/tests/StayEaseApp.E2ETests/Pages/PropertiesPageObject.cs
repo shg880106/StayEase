@@ -23,5 +23,8 @@ public class PropertiesPageObject
     public async Task NavigateToMyPropertiesAsync()
     {
         await MyPropertiesLink.ClickAsync();
+        // Azure free-tier App Service/SQL can cold-start, so wait for the SPA route
+        // to actually finish navigating before asserting on the resulting page state.
+        await _page.WaitForURLAsync("**/my-properties", new() { Timeout = 30000 });
     }
 }
