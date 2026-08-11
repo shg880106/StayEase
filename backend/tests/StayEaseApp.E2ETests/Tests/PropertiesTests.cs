@@ -12,7 +12,6 @@ namespace StayEaseApp.E2ETests.Tests;
 
 [Parallelizable(ParallelScope.Self)]
 [TestFixture]
-[Category("Smoke")]
 public class PropertiesTests : E2ETestBase
 {
     private LoginPageObject _loginPage = null!;
@@ -43,17 +42,5 @@ public class PropertiesTests : E2ETestBase
         await Expect(_propertiesPage.NoPropertiesYetHeading).ToBeVisibleAsync(new() { Timeout = 45000 });
     }
 
-    //[Test]
-    //public async Task MyTest()
-    //{
-    //    await Page.GotoAsync("http://localhost:4200/");
-    //    await Page.GetByRole(AriaRole.Link, new() { NameString = "Sign In" }).ClickAsync();
-    //    await Page.GetByRole(AriaRole.Textbox, new() { NameString = "you@example.com" }).ClickAsync();
-    //    await Page.GetByRole(AriaRole.Textbox, new() { NameString = "you@example.com" }).FillAsync("e2e-empty-properties@stayease.test");
-    //    await Page.GetByRole(AriaRole.Textbox, new() { NameString = "••••••••" }).FillAsync("asd1234");
-    //    await Page.GetByRole(AriaRole.Button, new() { NameString = "Sign In" }).ClickAsync();
-    //    await Page.GetByRole(AriaRole.Button, new() { NameString = "E Empty Properties" }).ClickAsync();
-    //    await Page.GetByRole(AriaRole.Link, new() { NameString = "My Properties" }).ClickAsync();
-    //    await Expect(Page.GetByRole(AriaRole.Heading, new() { NameString = "No properties yet" })).ToBeVisibleAsync();
-    //}
+    
 }

@@ -17,6 +17,7 @@ public class LoginPageObject
         _page = page;
     }
 
+    private ILocator RegisterLink => _page.GetByRole(AriaRole.Link, new() { NameString = "Register" });
     private ILocator SignInLink => _page.GetByRole(AriaRole.Link, new() { NameString = "Sign In" });
     private ILocator EmailInput => _page.GetByRole(AriaRole.Textbox, new() { NameString = "you@example.com" });
     private ILocator PasswordInput => _page.GetByRole(AriaRole.Textbox, new() { NameString = "••••••••" });
@@ -26,7 +27,8 @@ public class LoginPageObject
     private ILocator ValidationError => _page.GetByText("Invalid email or password");
     private ILocator UserMenuTrigger => _page.Locator("#user-menu-trigger");
     private ILocator EmailRequiredError => _page.GetByText("Email is required.");
-    private ILocator PasswordRequiredError => _page.GetByText("Password is required.");    
+    private ILocator PasswordRequiredError => _page.GetByText("Password is required.");
+    private ILocator LogOutButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Sign Out" });
 
     public ILocator EmailField => EmailInput;
     public ILocator PasswordField => PasswordInput;
@@ -35,6 +37,8 @@ public class LoginPageObject
     public ILocator UserMenu => UserMenuTrigger;
     public ILocator EmailRequiredValidation => EmailRequiredError;
     public ILocator PasswordRequiredValidation => PasswordRequiredError;
+    public ILocator SignInNavLink => SignInLink;
+    public ILocator RegisterNavLink => RegisterLink;
 
 
     public async Task NavigateToLoginAsync()
@@ -84,4 +88,9 @@ public class LoginPageObject
     {
         await UserMenuButton(displayName).ClickAsync();
     }
+
+    public async Task LogOutAsync()
+    {
+        await LogOutButton.ClickAsync();
+    }    
 }
