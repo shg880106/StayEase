@@ -29,6 +29,12 @@ public class PropertiesTests : E2ETestBase
     public async Task LoginWithUserWithoutProperties_ShowsNoPropertiesYet()
     {
         await _loginPage.LoginAsync(TestUsers.ValidUserWithoutPropertiesEmail, TestUsers.ValidUserWithoutPropertiesPassword);
+
+        var userMenuButton = _loginPage.UserMenuButton(TestUsers.ValidUserWithoutPropertiesDisplayName);
+        // Azure free-tier App Service/SQL can cold-start, so allow more time
+        // than the Playwright default (5s) when running against remote/CI environments.
+        await Expect(userMenuButton).ToBeVisibleAsync(new() { Timeout = 30000 });
+
         await _loginPage.OpenUserMenuAsync(TestUsers.ValidUserWithoutPropertiesDisplayName);
         await _propertiesPage.NavigateToMyPropertiesAsync();
 
