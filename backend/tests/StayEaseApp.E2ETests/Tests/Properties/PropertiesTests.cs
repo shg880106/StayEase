@@ -27,14 +27,8 @@ public class PropertiesTests : E2ETestBase
     [Test]
     public async Task LoginWithUserWithoutProperties_ShowsNoPropertiesYet()
     {
-        await _loginPage.LoginAsync(TestUsers.ValidUserWithoutPropertiesEmail, TestUsers.ValidUserWithoutPropertiesPassword);
+        await _loginPage.LoginAndOpenUserMenuAsync(TestUsers.ValidUserWithoutPropertiesEmail, TestUsers.ValidUserWithoutPropertiesPassword, TestUsers.ValidUserWithoutPropertiesDisplayName);
 
-        var userMenuButton = _loginPage.UserMenuButton(TestUsers.ValidUserWithoutPropertiesDisplayName);
-        // Azure free-tier App Service/SQL can cold-start, so allow more time
-        // than the Playwright default (5s) when running against remote/CI environments.
-        await Expect(userMenuButton).ToBeVisibleAsync(new() { Timeout = 30000 });
-
-        await _loginPage.OpenUserMenuAsync(TestUsers.ValidUserWithoutPropertiesDisplayName);
         await _propertiesPage.NavigateToMyPropertiesAsync();
 
         // Azure free-tier App Service/SQL can cold-start, so allow more time
@@ -45,14 +39,8 @@ public class PropertiesTests : E2ETestBase
     [Test]
     public async Task LoginWithUserWithProperties_ShowsProperties()
     {
-        await _loginPage.LoginAsync(TestUsers.ValidUserEmail, TestUsers.ValidUserPassword);
+        await _loginPage.LoginAndOpenUserMenuAsync(TestUsers.ValidUserEmail, TestUsers.ValidUserPassword, TestUsers.ValidUserDisplayName);
 
-        var userMenuButton = _loginPage.UserMenuButton(TestUsers.ValidUserDisplayName);
-        // Azure free-tier App Service/SQL can cold-start, so allow more time
-        // than the Playwright default (5s) when running against remote/CI environments.
-        await Expect(userMenuButton).ToBeVisibleAsync(new() { Timeout = 30000 });
-
-        await _loginPage.OpenUserMenuAsync(TestUsers.ValidUserDisplayName);
         await _propertiesPage.NavigateToMyPropertiesAsync();
 
         await Expect(_propertiesPage.ManagePropertiesText).ToBeVisibleAsync();
@@ -60,6 +48,25 @@ public class PropertiesTests : E2ETestBase
 
         var propertiesCount = await _propertiesPage.PropertyCards.CountAsync();
         Assert.That(propertiesCount, Is.GreaterThan(0), "Expected the user to have at least one property listed.");
+    }
 
+    [Test]
+    public async Task CreateProperty_WithValidData_AddsPropertyToList()
+    {
+        await _loginPage.LoginAndOpenUserMenuAsync(TestUsers.ValidUserEmail, TestUsers.ValidUserPassword, TestUsers.ValidUserDisplayName);
+
+        await _propertiesPage.NavigateToMyPropertiesAsync();
+
+        var propertyTitle = $"Test Property {Guid.NewGuid()}";
+
+        await _propertiesPage.CreatePropertyAsync(
+            title: propertyTitle,
+            description: "Test Description",
+            location: "Test Location",
+            pricePerNight: "120",
+            maxGuests: "4");
+
+        var createdPropertyCard = Page.GetByText(propertyTitle);
+        await Expect(createdPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
     }
 }

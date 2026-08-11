@@ -92,5 +92,14 @@ public class LoginPageObject
     public async Task LogOutAsync()
     {
         await LogOutButton.ClickAsync();
-    }    
+    }
+
+    public async Task LoginAndOpenUserMenuAsync(string email, string password, string displayName)
+    {
+        await LoginAsync(email, password);
+
+        await Assertions.Expect(UserMenuButton(displayName)).ToBeVisibleAsync(new() { Timeout = 30000 });
+
+        await OpenUserMenuAsync(displayName);
+    }
 }

@@ -19,6 +19,14 @@ public class PropertiesPageObject
     private ILocator NoPropertiesHeading => _page.GetByRole(AriaRole.Heading, new() { NameString = "No properties yet" });
     private ILocator ManagePropertiesDescription => _page.GetByText("Manage the properties you own");
     private ILocator PropertiesGrid => _page.Locator("div.grid.sm\\:grid-cols-2.lg\\:grid-cols-3.gap-6");
+    private ILocator AddPropertyButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Add Property" });
+    private ILocator TitleInput => _page.GetByRole(AriaRole.Textbox, new() { NameString = "Cozy mountain cabin" });
+    private ILocator DescriptionInput => _page.GetByRole(AriaRole.Textbox, new() { NameString = "Describe your property…" });
+    private ILocator LocationInput => _page.GetByRole(AriaRole.Textbox, new() { NameString = "Barcelona, Spain" });
+    private ILocator PriceInput => _page.GetByPlaceholder("120");
+    private ILocator MaxGuestsInput => _page.GetByPlaceholder("4");
+    private ILocator CreatePropertyButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Create Property" });
+
 
     public ILocator NoPropertiesYetHeading => NoPropertiesHeading;
     public ILocator ManagePropertiesText => ManagePropertiesDescription;
@@ -27,5 +35,27 @@ public class PropertiesPageObject
     public async Task NavigateToMyPropertiesAsync()
     {
         await MyPropertiesLink.ClickAsync();        
+    }
+
+    public async Task CreatePropertyAsync(string title, string description, string location, string pricePerNight, string maxGuests)
+    {
+        await AddPropertyButton.ClickAsync();
+
+        await TitleInput.ClickAsync();
+        await TitleInput.FillAsync(title);
+        await TitleInput.PressAsync("Tab");
+
+        await DescriptionInput.FillAsync(description);
+        await DescriptionInput.PressAsync("Tab");
+
+        await LocationInput.FillAsync(location);
+        await LocationInput.PressAsync("Tab");
+
+        await PriceInput.FillAsync(pricePerNight);
+        await PriceInput.PressAsync("Tab");
+
+        await MaxGuestsInput.FillAsync(maxGuests);
+
+        await CreatePropertyButton.ClickAsync();
     }
 }
