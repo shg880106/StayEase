@@ -16,6 +16,7 @@ public class PropertiesTests : E2ETestBase
 {
     private LoginPageObject _loginPage = null!;
     private PropertiesPageObject _propertiesPage = null!;
+    private string propertyTitle = $"Test Property {Guid.NewGuid()}";
 
     [SetUp]
     public void SetUpPageObject()
@@ -57,7 +58,23 @@ public class PropertiesTests : E2ETestBase
 
         await _propertiesPage.NavigateToMyPropertiesAsync();
 
-        var propertyTitle = $"Test Property {Guid.NewGuid()}";
+        await _propertiesPage.CreatePropertyAsync(
+            title: propertyTitle,
+            description: "Test Description",
+            location: "Test Location",
+            pricePerNight: "120",
+            maxGuests: "4");
+
+        var createdPropertyCard = Page.GetByText(propertyTitle);
+        await Expect(createdPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
+    }
+
+    [Test]
+    public async Task UpdateProperty_WithValidData_UpdatesPropertyInList()
+    {
+        await _loginPage.LoginAndOpenUserMenuAsync(TestUsers.ValidUserEmail, TestUsers.ValidUserPassword, TestUsers.ValidUserDisplayName);
+
+        await _propertiesPage.NavigateToMyPropertiesAsync();
 
         await _propertiesPage.CreatePropertyAsync(
             title: propertyTitle,
@@ -68,5 +85,18 @@ public class PropertiesTests : E2ETestBase
 
         var createdPropertyCard = Page.GetByText(propertyTitle);
         await Expect(createdPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
+
+        var updatedPropertyTitle = $"{propertyTitle} updated";
+
+        await _propertiesPage.UpdatePropertyAsync(
+            currentTitle: propertyTitle,
+            newTitle: updatedPropertyTitle,
+            newDescription: "Test Description updated",
+            newLocation: "Test Location updated",
+            newPricePerNight: "100",
+            newMaxGuests: "3");
+
+        var updatedPropertyCard = Page.GetByText(updatedPropertyTitle);
+        await Expect(updatedPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
     }
 }

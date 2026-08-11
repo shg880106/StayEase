@@ -26,21 +26,22 @@ public class PropertiesPageObject
     private ILocator PriceInput => _page.GetByPlaceholder("120");
     private ILocator MaxGuestsInput => _page.GetByPlaceholder("4");
     private ILocator CreatePropertyButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Create Property" });
-
+    private ILocator SaveChangesButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Save Changes" });
 
     public ILocator NoPropertiesYetHeading => NoPropertiesHeading;
     public ILocator ManagePropertiesText => ManagePropertiesDescription;
     public ILocator PropertyCards => PropertiesGrid.Locator("> div");
+
+    private ILocator UpdateButtonForProperty(string propertyTitle) =>
+        PropertyCards.Filter(new() { HasTextString = propertyTitle }).GetByTitle("Update property");
 
     public async Task NavigateToMyPropertiesAsync()
     {
         await MyPropertiesLink.ClickAsync();        
     }
 
-    public async Task CreatePropertyAsync(string title, string description, string location, string pricePerNight, string maxGuests)
+    public async Task FillPropertyForm(string title, string description, string location, string pricePerNight, string maxGuests)
     {
-        await AddPropertyButton.ClickAsync();
-
         await TitleInput.ClickAsync();
         await TitleInput.FillAsync(title);
         await TitleInput.PressAsync("Tab");
@@ -55,7 +56,23 @@ public class PropertiesPageObject
         await PriceInput.PressAsync("Tab");
 
         await MaxGuestsInput.FillAsync(maxGuests);
+    }
+
+    public async Task CreatePropertyAsync(string title, string description, string location, string pricePerNight, string maxGuests)
+    {
+        await AddPropertyButton.ClickAsync();
+
+        await FillPropertyForm(title, description, location, pricePerNight, maxGuests);
 
         await CreatePropertyButton.ClickAsync();
+    }
+
+    public async Task UpdatePropertyAsync(string currentTitle, string newTitle, string newDescription, string newLocation, string newPricePerNight, string newMaxGuests)
+    {
+        await UpdateButtonForProperty(currentTitle).ClickAsync();
+
+        await FillPropertyForm(newTitle, newDescription, newLocation, newPricePerNight, newMaxGuests);
+        
+        await SaveChangesButton.ClickAsync();
     }
 }
