@@ -1,4 +1,5 @@
 name: E2E-Tests
+
 resources:
   pipelines:
   - pipeline: buildPipelineE2E
@@ -7,27 +8,39 @@ resources:
       branches:
         include:
         - main
+
 trigger: none
+
 pool:
   name: Default  # self-hosted agent pool name
+
 steps:
 - task: UseDotNet@2
   inputs:
     packageType: sdk
     version: '8.0.x'
   displayName: 'Use .NET SDK'
+
 - script: dotnet build --configuration Release
   displayName: 'Build'
   workingDirectory: backend/tests/StayEaseApp.E2ETests
+
 - task: PowerShell@2
   displayName: 'Install Playwright Browsers'
   inputs:
     targetType: inline
     script: ./bin/Release/net8.0/playwright.ps1 install --with-deps
     workingDirectory: backend/tests/StayEaseApp.E2ETests
-- script: dotnet test -s ./.runsettings --configuration Release
+
+- task: DotNetCoreCLI@2
   displayName: 'Run Tests'
-  workingDirectory: backend/tests/StayEaseApp.E2ETests
+  inputs:
+    command: 'test'
+    projects: 'backend/tests/StayEaseApp.E2ETests/StayEaseApp.E2ETests.csproj'
+    arguments: '-s ./.runsettings --configuration Release --no-build'
+    publishTestResults: true
+    testRunTitle: 'StayEase E2E Tests'
+    workingDirectory: 'backend/tests/StayEaseApp.E2ETests'
   env:
     TEST_BASEURL: $(TEST_BASEURL)
     TEST_APIURL: $(TEST_APIURL)

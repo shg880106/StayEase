@@ -78,4 +78,16 @@ public class LoginTests : E2ETestBase
         await Expect(_loginPage.EmailRequiredValidation).ToBeVisibleAsync();
         await Expect(_loginPage.PasswordRequiredValidation).ToBeVisibleAsync();        
     }
+
+    [Test]
+    [Category("Authentication")]
+    public async Task LogOutFromTheApplication_WhenUserIsLoggedIn_ReturnsToGuestState()
+    {
+        await _loginPage.LoginAndOpenUserMenuAsync(TestUsers.ValidUserEmail, TestUsers.ValidUserPassword, TestUsers.ValidUserDisplayName);
+       
+        await _loginPage.LogOutAsync();
+
+        await Expect(_loginPage.SignInNavLink).ToBeVisibleAsync();
+        await Expect(_loginPage.RegisterNavLink).ToBeVisibleAsync();
+    }
 }
