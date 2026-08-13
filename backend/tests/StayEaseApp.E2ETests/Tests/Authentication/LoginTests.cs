@@ -43,7 +43,7 @@ public class LoginTests : E2ETestBase
         var userMenuButton = _loginPage.UserMenuButton(TestUsers.ValidUserDisplayName);
         // Azure free-tier App Service/SQL can cold-start, so allow more time
         // than the Playwright default (5s) when running against remote/CI environments.
-        await Expect(userMenuButton).ToBeVisibleAsync(new() { Timeout = 30000 });
+        await Expect(userMenuButton).ToBeVisibleAsync(new() { Timeout = 45000 });
 
         await _loginPage.OpenUserMenuAsync(TestUsers.ValidUserDisplayName);
 
@@ -63,7 +63,7 @@ public class LoginTests : E2ETestBase
 
         // Azure free-tier App Service/SQL can cold-start, so allow more time
         // than the Playwright default (5s) when running against remote/CI environments.
-        await Expect(_loginPage.LoginValidationError).ToBeVisibleAsync(new() { Timeout = 30000 });
+        await Expect(_loginPage.LoginValidationError).ToBeVisibleAsync(new() { Timeout = 45000 });
     }
 
     [Test]
