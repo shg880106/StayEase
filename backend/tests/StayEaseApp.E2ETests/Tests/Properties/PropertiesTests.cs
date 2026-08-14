@@ -1,4 +1,5 @@
 ﻿using Microsoft.Playwright;
+using Microsoft.VisualBasic;
 using StayEaseApp.E2ETests.Infrastructure;
 using StayEaseApp.E2ETests.Pages;
 using StayEaseApp.E2ETests.TestData;
@@ -98,5 +99,32 @@ public class PropertiesTests : E2ETestBase
 
         var updatedPropertyCard = Page.GetByText(updatedPropertyTitle);
         await Expect(updatedPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
+    }
+    
+    [Test]
+    public async Task DeleteProperty_WithValidData_RemovesPropertyFromList()
+    {
+        await _loginPage.LoginAndOpenUserMenuAsync(TestUsers.ValidUserEmail, TestUsers.ValidUserPassword, TestUsers.ValidUserDisplayName);
+
+        await _propertiesPage.NavigateToMyPropertiesAsync();
+
+        await _propertiesPage.CreatePropertyAsync(
+            title: propertyTitle,
+            description: "Test Description",
+            location: "Test Location",
+            pricePerNight: "120",
+            maxGuests: "4");
+
+        var createdPropertyCard = Page.GetByText(propertyTitle);
+        await Expect(createdPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
+
+        var deletedPropertyTitle = $"{propertyTitle}";
+
+        var deletedPropertyCard = Page.GetByText(deletedPropertyTitle);
+        await Expect(deletedPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
+
+        await _propertiesPage.DeletePropertyAsync(currentTitle: deletedPropertyTitle);
+        await Expect(_propertiesPage.DeleteSuccessMessage(deletedPropertyTitle)).ToBeVisibleAsync(new() { Timeout = 45000 });
+        await Expect(deletedPropertyCard).Not.ToBeVisibleAsync(new() { Timeout = 45000 });
     }
 }

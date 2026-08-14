@@ -27,6 +27,7 @@ public class PropertiesPageObject
     private ILocator MaxGuestsInput => _page.GetByPlaceholder("4");
     private ILocator CreatePropertyButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Create Property" });
     private ILocator SaveChangesButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Save Changes" });
+    private ILocator DeleteConfirmButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Yes, delete" });
 
     public ILocator NoPropertiesYetHeading => NoPropertiesHeading;
     public ILocator ManagePropertiesText => ManagePropertiesDescription;
@@ -34,6 +35,12 @@ public class PropertiesPageObject
 
     private ILocator UpdateButtonForProperty(string propertyTitle) =>
         PropertyCards.Filter(new() { HasTextString = propertyTitle }).GetByTitle("Update property");
+    
+    private ILocator DeleteButtonForProperty(string propertyTitle) =>
+        PropertyCards.Filter(new() { HasTextString = propertyTitle }).GetByTitle("Delete property");
+
+    public ILocator DeleteSuccessMessage(string propertyTitle) =>
+        _page.GetByText($"\"{propertyTitle}\" was deleted successfully.", new() { Exact = false });
 
     public async Task NavigateToMyPropertiesAsync()
     {
@@ -74,5 +81,11 @@ public class PropertiesPageObject
         await FillPropertyForm(newTitle, newDescription, newLocation, newPricePerNight, newMaxGuests);
         
         await SaveChangesButton.ClickAsync();
+    }
+    
+    public async Task DeletePropertyAsync(string currentTitle)
+    {
+        await DeleteButtonForProperty(currentTitle).ClickAsync();
+        await DeleteConfirmButton.ClickAsync();        
     }
 }
