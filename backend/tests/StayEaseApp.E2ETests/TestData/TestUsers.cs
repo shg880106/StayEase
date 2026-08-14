@@ -34,4 +34,9 @@ public class TestUsers
     public const string ValidUserWithoutBookingsEmail = "e2e-empty-bookings@stayease.test";
     public const string ValidUserWithoutBookingsPassword = "asd1234";
     public const string ValidUserWithoutBookingsDisplayName = "E Empty Bookings";
+
+    // valid user to test user with bookings, make sure this user exists in the database
+    public const string ValidUserWithBookingsEmail = "e2e-user-bookings@stayease.test";
+    public const string ValidUserWithBookingsPassword = "asd1234";
+    public const string ValidUserWithBookingsDisplayName = "U User Bookings";
 }
