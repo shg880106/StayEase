@@ -19,11 +19,14 @@ public class BookingPageObject
     private ILocator MyBookingsLink => _page.GetByRole(AriaRole.Link, new() { NameString = "My Bookings" });
     private ILocator NoBookingsHeading => _page.GetByRole(AriaRole.Heading, new() { NameString = "No bookings yet" });
     private ILocator ManageBookingsDescription => _page.GetByText("All reservations you have made on StayEase.");
+    private ILocator SelectedProperty(string propertyTitle) => _page.GetByRole(AriaRole.Heading, new() { NameString = propertyTitle });
     // Every booking card renders a "Booking #<id>" text, regardless of which status group it belongs to.
     private ILocator BookingCardsLocator => _page.GetByText("Booking #", new() { Exact = false });
     private ILocator BookingConfirmedSuccess => _page.GetByRole(AriaRole.Heading, new() { NameString = "Booking Confirmed!" });
     private ILocator EstimatedTotalAmount => _page.Locator("span.text-rose-500", new() { HasTextString = "$" }).Last;
     private ILocator ConfirmBookingButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Confirm Booking" });
+    private ILocator CheckIn => _page.GetByLabel("Check-in");   
+    private ILocator CheckOut => _page.GetByLabel("Check-out");
 
 
     public ILocator NoBookingsYetHeading => NoBookingsHeading;
@@ -47,14 +50,14 @@ public class BookingPageObject
 
     public async Task SelectPropertyAsync(string propertyTitle)
     {
-        var propertyCard = _page.GetByRole(AriaRole.Heading, new() { NameString = propertyTitle });
-        await propertyCard.ClickAsync();
+        //var propertyCard = _page.GetByRole(AriaRole.Heading, new() { NameString = propertyTitle });
+        await SelectedProperty(propertyTitle).ClickAsync();
     }
 
-    public async Task FillBookingDatesAsync(string check_in, string check_out)
+    public async Task FillBookingDatesAsync(string checkIn, string checkOut)
     {
-        await _page.GetByRole(AriaRole.Textbox).Nth(2).FillAsync(check_in);
-        await _page.GetByRole(AriaRole.Textbox).Nth(3).FillAsync(check_out);
+        await CheckIn.FillAsync(checkIn);
+        await CheckOut.FillAsync(checkOut);
     }
 
     public async Task ConfirmBookingAsync()
@@ -62,9 +65,9 @@ public class BookingPageObject
         await ConfirmBookingButton.ClickAsync();
     }
 
-    public async Task CreateBookingAsync(string check_in, string check_out)
+    public async Task CreateBookingAsync(string checkIn, string checkOut)
     {
-        await FillBookingDatesAsync(check_in, check_out);
+        await FillBookingDatesAsync(checkIn, checkOut);
         await ConfirmBookingAsync();
     }
 }

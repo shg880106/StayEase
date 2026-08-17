@@ -82,8 +82,8 @@ public class BookingTests : E2ETestBase
         var checkIn = DateTime.Today.AddDays(1);
         var checkOut = DateTime.Today.AddDays(8);
         await _bookingPage.FillBookingDatesAsync(
-            check_in: checkIn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-            check_out: checkOut.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+            checkIn: checkIn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            checkOut: checkOut.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
 
         // Verify the estimated total before confirming (7 nights x $120 = $840)
         await Expect(_bookingPage.EstimatedTotal).ToHaveTextAsync("$840");
