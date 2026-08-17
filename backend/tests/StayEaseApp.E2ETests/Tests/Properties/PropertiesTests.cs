@@ -120,7 +120,7 @@ public class PropertiesTests : E2ETestBase
 
         var deletedPropertyTitle = $"{propertyTitle}";
 
-        var deletedPropertyCard = Page.GetByText(deletedPropertyTitle);
+        var deletedPropertyCard = _propertiesPage.PropertyCardHeading(deletedPropertyTitle);
         await Expect(deletedPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
 
         await _propertiesPage.DeletePropertyAsync(currentTitle: deletedPropertyTitle);
