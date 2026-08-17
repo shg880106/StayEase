@@ -50,7 +50,6 @@ public class BookingPageObject
 
     public async Task SelectPropertyAsync(string propertyTitle)
     {
-        //var propertyCard = _page.GetByRole(AriaRole.Heading, new() { NameString = propertyTitle });
         await SelectedProperty(propertyTitle).ClickAsync();
     }
 
