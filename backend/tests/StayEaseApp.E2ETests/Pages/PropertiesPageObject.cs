@@ -42,6 +42,9 @@ public class PropertiesPageObject
     public ILocator DeleteSuccessMessage(string propertyTitle) =>
         _page.GetByText($"\"{propertyTitle}\" was deleted successfully.", new() { Exact = false });
 
+    public ILocator PropertyCardHeading(string propertyTitle) =>
+        _page.GetByRole(AriaRole.Heading, new() { NameString = propertyTitle });
+
     public async Task NavigateToMyPropertiesAsync()
     {
         await MyPropertiesLink.ClickAsync();        

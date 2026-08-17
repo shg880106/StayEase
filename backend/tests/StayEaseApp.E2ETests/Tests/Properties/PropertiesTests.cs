@@ -115,12 +115,12 @@ public class PropertiesTests : E2ETestBase
             pricePerNight: "120",
             maxGuests: "4");
 
-        var createdPropertyCard = Page.GetByText(propertyTitle);
+        var createdPropertyCard = _propertiesPage.PropertyCardHeading(propertyTitle);
         await Expect(createdPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
 
         var deletedPropertyTitle = $"{propertyTitle}";
 
-        var deletedPropertyCard = Page.GetByText(deletedPropertyTitle);
+        var deletedPropertyCard = _propertiesPage.PropertyCardHeading(deletedPropertyTitle);
         await Expect(deletedPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
 
         await _propertiesPage.DeletePropertyAsync(currentTitle: deletedPropertyTitle);
