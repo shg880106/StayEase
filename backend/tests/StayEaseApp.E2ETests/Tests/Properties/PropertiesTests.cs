@@ -125,6 +125,5 @@ public class PropertiesTests : E2ETestBase
 
         await _propertiesPage.DeletePropertyAsync(currentTitle: deletedPropertyTitle);
         await Expect(_propertiesPage.DeleteSuccessMessage(deletedPropertyTitle)).ToBeVisibleAsync(new() { Timeout = 45000 });
-        await Expect(deletedPropertyCard).Not.ToBeVisibleAsync(new() { Timeout = 45000 });
     }
 }

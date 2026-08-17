@@ -89,6 +89,17 @@ public class PropertiesPageObject
     public async Task DeletePropertyAsync(string currentTitle)
     {
         await DeleteButtonForProperty(currentTitle).ClickAsync();
-        await DeleteConfirmButton.ClickAsync();        
+
+        var responseTask = _page.WaitForResponseAsync(r =>
+            r.Request.Method == "DELETE" &&
+            r.Url.Contains("/api/property/", StringComparison.OrdinalIgnoreCase));
+        await DeleteConfirmButton.ClickAsync();
+        var response = await responseTask;
+
+        if (!response.Ok)
+        {
+            var body = await response.TextAsync();
+            throw new Exception($"Delete property request failed with status {response.Status}: {body}");
+        }        
     }
 }
