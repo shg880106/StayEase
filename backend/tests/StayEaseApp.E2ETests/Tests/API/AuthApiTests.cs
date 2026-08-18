@@ -83,5 +83,35 @@ public class AuthApiTests
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
     }
 
-    
+    [Test]
+    [Category("Authentication")]
+    public async Task LoginIn_WithValidCredentials_Returns200()
+    {
+        var request = new
+        {
+            email = TestUsers.ValidUserEmail,
+            password = TestUsers.ValidUserPassword
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/Auth/login", request);
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+    }
+
+    [Test]
+    [Category("Authentication")]
+    [Category("NegativePath")]
+    public async Task LoginIn_WithInvalidCredentials_Returns401()
+    {
+        var request = new
+        {
+            email = TestUsers.InvalidUserEmail,
+            password = TestUsers.InvalidUserPassword
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/Auth/login", request);
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+    }
+
 }
