@@ -1,4 +1,5 @@
-﻿using StayEaseApp.Application.DTOs;
+﻿using Newtonsoft.Json.Linq;
+using StayEaseApp.Application.DTOs;
 using StayEaseApp.E2ETests.Infrastructure;
 using StayEaseApp.E2ETests.TestData;
 using System;
@@ -46,5 +47,44 @@ public class CreatePropertyApiTests : ApiTestBase
         var property = await ReadAsAsync<PropertyResponseDto>(response);
         Assert.That(property, Is.Not.Null);
         Assert.That(property!.Title, Is.EqualTo(request.title));
+    }
+
+    [Test]
+    [Category("Properties")]
+    [Category("NegativePath")]
+    public async Task CreateProperty_WhenUserIsNotAuthenticated_Returns401Unauthorized()
+    {        
+        var request = new
+        {
+            title = "Test title",
+            description = "Test description",
+            pricePerNight = 120,
+            location = "Test location",
+            maxGuests = 4,
+            imageUrl = ""
+        };
+
+        var response = await Request.PostAsync("api/Property", new()
+        {
+            DataObject = request
+        });
+
+        Assert.That(response.Status, Is.EqualTo(401));
+    }
+
+    [Test]
+    [Category("Properties")]
+    [Category("NegativePath")]
+    public async Task CreateProperty_WhenTokenIsInvalid_Returns401Unauthorized()
+    {
+        var response = await Request.PostAsync("api/Property", new()
+        {
+            Headers = new Dictionary<string, string>
+            {
+                ["Authorization"] = "Bearer invalid.token.value"
+            }
+        });
+
+        Assert.That(response.Status, Is.EqualTo(401));
     }
 }
