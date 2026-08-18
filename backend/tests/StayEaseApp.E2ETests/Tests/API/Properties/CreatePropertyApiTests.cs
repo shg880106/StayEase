@@ -24,12 +24,12 @@ public class CreatePropertyApiTests : ApiTestBase
         
         var request = new
         {            
-            title = "string",
-            description = "string",
-            pricePerNight = 0,
-            location = "string",
-            maxGuests = 0,
-            imageUrl = "string"
+            title = "Test title",
+            description = "Test description",
+            pricePerNight = 120,
+            location = "Test location",
+            maxGuests = 4,
+            imageUrl = ""
         };
 
         var response = await Request.PostAsync("api/Property", new()

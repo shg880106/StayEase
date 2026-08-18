@@ -30,7 +30,7 @@ public class AuthApiTests : ApiTestBase
             password = TestUsers.ValidUserToRegisterPassword
         };
 
-        var response = await Request.PostAsync("/api/Auth/register", new() { DataObject = request });
+        var response = await Request.PostAsync("api/Auth/register", new() { DataObject = request });
 
         Assert.That(response.Status, Is.EqualTo(200));
     }
@@ -47,7 +47,7 @@ public class AuthApiTests : ApiTestBase
             password = TestUsers.ValidUserPassword
         };
 
-        var response = await Request.PostAsync("/api/Auth/register", new() { DataObject = request });
+        var response = await Request.PostAsync("api/Auth/register", new() { DataObject = request });
 
         Assert.That(response.Status, Is.EqualTo(400));
     }
@@ -62,7 +62,7 @@ public class AuthApiTests : ApiTestBase
             password = TestUsers.ValidUserPassword
         };
 
-        var response = await Request.PostAsync("/api/Auth/login", new() { DataObject = request });
+        var response = await Request.PostAsync("api/Auth/login", new() { DataObject = request });
 
         Assert.That(response.Status, Is.EqualTo(200));
     }
@@ -78,7 +78,7 @@ public class AuthApiTests : ApiTestBase
             password = TestUsers.InvalidUserPassword
         };
 
-        var response = await Request.PostAsync("/api/Auth/login", new() { DataObject = request });
+        var response = await Request.PostAsync("api/Auth/login", new() { DataObject = request });
 
         Assert.That(response.Status, Is.EqualTo(401));
     }
@@ -93,7 +93,7 @@ public class AuthApiTests : ApiTestBase
             password = TestUsers.ValidUserPassword
         };
 
-        var response = await Request.PostAsync("/api/Auth/login", new() { DataObject = request });
+        var response = await Request.PostAsync("api/Auth/login", new() { DataObject = request });
         var content = await ReadAsAsync<AuthResponseDto>(response);
 
         Assert.Multiple(() =>
