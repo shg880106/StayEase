@@ -43,6 +43,6 @@ public static class TestEnvironment
         }
 
         // Final fallback for local dev
-        return "http://localhost:7172";
+        return "https://localhost:7172";
     }
 }
