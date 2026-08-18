@@ -1,4 +1,5 @@
-﻿using StayEaseApp.E2ETests.Configuration;
+﻿using StayEaseApp.Application.DTOs;
+using StayEaseApp.E2ETests.Configuration;
 using StayEaseApp.E2ETests.TestData;
 using System;
 using System.Collections.Generic;
@@ -15,12 +16,6 @@ namespace StayEaseApp.E2ETests.Tests.API;
 [Category("Api")]
 public class AuthApiTests
 {
-    //  POST /api/auth/register → 200 con token válido;
-    //  400 si email ya existe(espejo de tus tests de UI, pero validando el JSON exacto).
-    //	POST /api/auth/login → 200 con token; 401 con credenciales inválidas.
-    //	GET /api/auth/me con/sin token → 200 vs 401.
-    //	GET /api/property → 200 y forma del payload.
-
     private HttpClient _client = null!;
 
     [SetUp]
@@ -32,8 +27,8 @@ public class AuthApiTests
         var handler = new HttpClientHandler();
         if (isLocal)
         {
-            // Solo para entornos locales/dev con certificado autofirmado de Kestrel.
-            // No usar este bypass contra entornos productivos o de CI reales.
+            // For local/dev environments only with a Kestrel self-signed certificate
+            // Do not use this bypass against production or real CI environments
             handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
         }
 
@@ -112,6 +107,26 @@ public class AuthApiTests
         var response = await _client.PostAsJsonAsync("/api/Auth/login", request);
 
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+    }
+
+    [Test]
+    [Category("Authentication")]
+    public async Task LoginIn_WithValidCredentials_ReturnsTokenAndUserInfo()
+    {
+        var request = new
+        {
+            email = TestUsers.ValidUserEmail,
+            password = TestUsers.ValidUserPassword
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/Auth/login", request);
+        var content = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(content?.Token, Is.Not.Null.And.Not.Empty);
+        });
     }
 
 }
