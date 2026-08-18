@@ -1,5 +1,6 @@
 ﻿using StayEaseApp.Application.DTOs;
 using StayEaseApp.E2ETests.Configuration;
+using StayEaseApp.E2ETests.Infrastructure;
 using StayEaseApp.E2ETests.TestData;
 using System;
 using System.Collections.Generic;
@@ -14,35 +15,8 @@ namespace StayEaseApp.E2ETests.Tests.API;
 [Parallelizable(ParallelScope.Self)]
 [TestFixture]
 [Category("Api")]
-public class AuthApiTests
+public class AuthApiTests : ApiTestBase
 {
-    private HttpClient _client = null!;
-
-    [SetUp]
-    public void SetUp()
-    {
-        var apiUrl = TestEnvironment.GetApiUrl();
-        var isLocal = apiUrl.Contains("localhost");
-
-        var handler = new HttpClientHandler();
-        if (isLocal)
-        {
-            // For local/dev environments only with a Kestrel self-signed certificate
-            // Do not use this bypass against production or real CI environments
-            handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
-        }
-
-        _client = new HttpClient(handler)
-        {
-            BaseAddress = new Uri(apiUrl),
-            DefaultRequestVersion = HttpVersion.Version11,
-            DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
-        };
-    }
-
-    [TearDown]
-    public void TearDown() => _client.Dispose();
-
     [Test]
     [Category("Registration")]
     public async Task Register_WithValidData_Returns200()
@@ -56,9 +30,9 @@ public class AuthApiTests
             password = TestUsers.ValidUserToRegisterPassword
         };
 
-        var response = await _client.PostAsJsonAsync("/api/Auth/register", request);
+        var response = await Request.PostAsync("/api/Auth/register", new() { DataObject = request });
 
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(response.Status, Is.EqualTo(200));
     }
 
     [Test]
@@ -73,9 +47,9 @@ public class AuthApiTests
             password = TestUsers.ValidUserPassword
         };
 
-        var response = await _client.PostAsJsonAsync("/api/Auth/register", request);
+        var response = await Request.PostAsync("/api/Auth/register", new() { DataObject = request });
 
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        Assert.That(response.Status, Is.EqualTo(400));
     }
 
     [Test]
@@ -88,9 +62,9 @@ public class AuthApiTests
             password = TestUsers.ValidUserPassword
         };
 
-        var response = await _client.PostAsJsonAsync("/api/Auth/login", request);
+        var response = await Request.PostAsync("/api/Auth/login", new() { DataObject = request });
 
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(response.Status, Is.EqualTo(200));
     }
 
     [Test]
@@ -104,9 +78,9 @@ public class AuthApiTests
             password = TestUsers.InvalidUserPassword
         };
 
-        var response = await _client.PostAsJsonAsync("/api/Auth/login", request);
+        var response = await Request.PostAsync("/api/Auth/login", new() { DataObject = request });
 
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+        Assert.That(response.Status, Is.EqualTo(401));
     }
 
     [Test]
@@ -119,12 +93,12 @@ public class AuthApiTests
             password = TestUsers.ValidUserPassword
         };
 
-        var response = await _client.PostAsJsonAsync("/api/Auth/login", request);
-        var content = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+        var response = await Request.PostAsync("/api/Auth/login", new() { DataObject = request });
+        var content = await ReadAsAsync<AuthResponseDto>(response);
 
         Assert.Multiple(() =>
         {
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.Status, Is.EqualTo(200));
             Assert.That(content?.Token, Is.Not.Null.And.Not.Empty);
         });
     }
