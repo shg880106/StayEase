@@ -27,6 +27,7 @@ public class PropertiesPageObject
     private ILocator MaxGuestsInput => _page.GetByPlaceholder("4");
     private ILocator CreatePropertyButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Create Property" });
     private ILocator SaveChangesButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Save Changes" });
+    private ILocator DeleteConfirmButton => _page.GetByRole(AriaRole.Button, new() { NameString = "Yes, delete" });
 
     public ILocator NoPropertiesYetHeading => NoPropertiesHeading;
     public ILocator ManagePropertiesText => ManagePropertiesDescription;
@@ -34,6 +35,15 @@ public class PropertiesPageObject
 
     private ILocator UpdateButtonForProperty(string propertyTitle) =>
         PropertyCards.Filter(new() { HasTextString = propertyTitle }).GetByTitle("Update property");
+    
+    private ILocator DeleteButtonForProperty(string propertyTitle) =>
+        PropertyCards.Filter(new() { HasTextString = propertyTitle }).GetByTitle("Delete property");
+
+    public ILocator DeleteSuccessMessage(string propertyTitle) =>
+        _page.GetByText($"\"{propertyTitle}\" was deleted successfully.", new() { Exact = false });
+
+    public ILocator PropertyCardHeading(string propertyTitle) =>
+        _page.GetByRole(AriaRole.Heading, new() { NameString = propertyTitle });
 
     public async Task NavigateToMyPropertiesAsync()
     {
@@ -74,5 +84,22 @@ public class PropertiesPageObject
         await FillPropertyForm(newTitle, newDescription, newLocation, newPricePerNight, newMaxGuests);
         
         await SaveChangesButton.ClickAsync();
+    }
+    
+    public async Task DeletePropertyAsync(string currentTitle)
+    {
+        await DeleteButtonForProperty(currentTitle).ClickAsync();
+
+        var responseTask = _page.WaitForResponseAsync(r =>
+            r.Request.Method == "DELETE" &&
+            r.Url.Contains("/api/property/", StringComparison.OrdinalIgnoreCase));
+        await DeleteConfirmButton.ClickAsync();
+        var response = await responseTask;
+
+        if (!response.Ok)
+        {
+            var body = await response.TextAsync();
+            throw new Exception($"Delete property request failed with status {response.Status}: {body}");
+        }        
     }
 }

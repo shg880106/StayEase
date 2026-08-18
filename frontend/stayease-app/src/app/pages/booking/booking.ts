@@ -25,8 +25,9 @@ export class BookingComponent implements OnInit {
   ngOnInit(): void {
     this.propertyService.getAll().subscribe({
       next: (data) => {
-        this.properties.set(data);
-        this.filteredProperties.set(data);
+        const normalized = data.map(p => ({ ...p, reviews: p.reviews ?? [] }));
+        this.properties.set(normalized);
+        this.filteredProperties.set(normalized);
       },
       error: () => this.propertiesError.set('Failed to load properties. Please try again later.'),
     });
@@ -46,7 +47,7 @@ export class BookingComponent implements OnInit {
 
     this.propertyService.search(filters).subscribe({
       next: (data) => {
-        this.filteredProperties.set(data);
+        this.filteredProperties.set(data.map(p => ({ ...p, reviews: p.reviews ?? [] })));
         this.isSearching.set(false);
       },
       error: () => {

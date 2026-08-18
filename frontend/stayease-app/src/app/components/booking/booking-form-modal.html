@@ -67,10 +67,11 @@
           <!-- Dates Row -->
           <div class="grid grid-cols-2 gap-4 mb-5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">
+              <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1.5">
                 Check-in <span class="text-rose-500">*</span>
               </label>
               <input
+                id="startDate"
                 type="date"
                 formControlName="startDate"
                 [min]="today"
@@ -84,10 +85,11 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">
+              <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1.5">
                 Check-out <span class="text-rose-500">*</span>
               </label>
               <input
+                id="endDate"
                 type="date"
                 formControlName="endDate"
                 [min]="today"

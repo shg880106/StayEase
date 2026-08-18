@@ -25,6 +25,12 @@ steps:
   displayName: 'Build'
   workingDirectory: backend/tests/StayEaseApp.E2ETests
 
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish E2E test binaries'
+  inputs:
+    targetPath: 'backend/tests/StayEaseApp.E2ETests/bin/Release/net8.0'
+    artifact: 'e2e-test-binaries'
+
 - task: PowerShell@2
   displayName: 'Install Playwright Browsers'
   inputs:
