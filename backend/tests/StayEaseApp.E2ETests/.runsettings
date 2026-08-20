@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RunSettings>
+	<RunConfiguration>
+		<EnvironmentVariables>
+			<!-- Ensures Playwright browsers run headless in CI -->
+			<HEADED>0</HEADED>
+		</EnvironmentVariables>
+	</RunConfiguration>
 	<TestRunParameters>
 		<Parameter name="BaseUrl" value="https://localhost:4200" />
 		<Parameter name="ApiUrl" value="https://localhost:7172" />
 	</TestRunParameters>
 	<Playwright>
 		<BrowserName>chromium</BrowserName>
+		<ExpectTimeout>10000</ExpectTimeout>
 		<LaunchOptions>
 			<Headless>true</Headless>
 		</LaunchOptions>
 	</Playwright>
+	<NUnit>
+		<!-- Captures trace, screenshot, and video only when a test fails -->
+		<TestOutputXml>false</TestOutputXml>
+	</NUnit>
 </RunSettings>

@@ -50,3 +50,10 @@ steps:
   env:
     TEST_BASEURL: $(TEST_BASEURL)
     TEST_APIURL: $(TEST_APIURL)
+
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish Playwright traces & screenshots (on failure)'
+  condition: succeededOrFailed()
+  inputs:
+    targetPath: 'backend/tests/StayEaseApp.E2ETests/bin/Release/net8.0/playwright-artifacts'
+    artifact: 'playwright-artifacts'
