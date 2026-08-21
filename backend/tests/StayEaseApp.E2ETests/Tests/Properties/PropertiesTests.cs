@@ -17,13 +17,14 @@ public class PropertiesTests : E2ETestBase
 {
     private LoginPageObject _loginPage = null!;
     private PropertiesPageObject _propertiesPage = null!;
-    private string propertyTitle = $"Test Property {Guid.NewGuid()}";
+    private string propertyTitle = null!;
 
     [SetUp]
     public void SetUpPageObject()
     {
         _loginPage = new LoginPageObject(Page);
         _propertiesPage = new PropertiesPageObject(Page);
+        propertyTitle = $"Test Property {Guid.NewGuid()}";
     }
 
     [Test]
@@ -66,7 +67,7 @@ public class PropertiesTests : E2ETestBase
             pricePerNight: "120",
             maxGuests: "4");
 
-        var createdPropertyCard = Page.GetByText(propertyTitle);
+        var createdPropertyCard = _propertiesPage.PropertyCardHeading(propertyTitle);
         await Expect(createdPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
     }
 
@@ -84,7 +85,7 @@ public class PropertiesTests : E2ETestBase
             pricePerNight: "120",
             maxGuests: "4");
 
-        var createdPropertyCard = Page.GetByText(propertyTitle);
+        var createdPropertyCard = _propertiesPage.PropertyCardHeading(propertyTitle);
         await Expect(createdPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
 
         var updatedPropertyTitle = $"{propertyTitle} updated";
@@ -97,7 +98,7 @@ public class PropertiesTests : E2ETestBase
             newPricePerNight: "100",
             newMaxGuests: "3");
 
-        var updatedPropertyCard = Page.GetByText(updatedPropertyTitle);
+        var updatedPropertyCard = _propertiesPage.PropertyCardHeading(updatedPropertyTitle);
         await Expect(updatedPropertyCard).ToBeVisibleAsync(new() { Timeout = 45000 });
     }
     

@@ -34,16 +34,16 @@ public class PropertiesPageObject
     public ILocator PropertyCards => PropertiesGrid.Locator("> div");
 
     private ILocator UpdateButtonForProperty(string propertyTitle) =>
-        PropertyCards.Filter(new() { HasTextString = propertyTitle }).GetByTitle("Update property");
+        PropertyCards.Filter(new() { HasTextString = propertyTitle }).First.GetByTitle("Update property");
     
     private ILocator DeleteButtonForProperty(string propertyTitle) =>
-        PropertyCards.Filter(new() { HasTextString = propertyTitle }).GetByTitle("Delete property");
+        PropertyCards.Filter(new() { HasTextString = propertyTitle }).First.GetByTitle("Delete property");
 
     public ILocator DeleteSuccessMessage(string propertyTitle) =>
         _page.GetByText($"\"{propertyTitle}\" was deleted successfully.", new() { Exact = false });
 
     public ILocator PropertyCardHeading(string propertyTitle) =>
-        _page.GetByRole(AriaRole.Heading, new() { NameString = propertyTitle });
+        _page.GetByRole(AriaRole.Heading, new() { NameString = propertyTitle }).First;
 
     public async Task NavigateToMyPropertiesAsync()
     {
