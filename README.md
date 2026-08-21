@@ -142,7 +142,8 @@ backend/<br>
 ├── StayEaseApp.Application      # Application layer <br>
 ├── StayEaseApp.Domain           # Domain layer <br>
 ├── StayEaseApp.Infrastructure   # Infrastructure layer <br>
-└── StayEaseApp.Tests            # Unit and integration tests <br>
+├── StayEaseApp.Tests            # Unit and integration tests <br>
+└── StayEaseApp.E2ETests         # End-to-end tests (Playwright + NUnit) <br>
 
 ## 🛠️ Tech Stack
 
@@ -162,6 +163,11 @@ backend/<br>
 - **RxJS** - Reactive programming
 - **Angular Router** - Navigation
 - **HttpClient** - API communication
+
+### Testing
+- **NUnit** - Unit and integration testing framework
+- **Microsoft.Playwright.NUnit** - Browser automation for E2E tests
+- **Page Object Model** - Maintainable UI test structure
 
 ### DevOps & Deployment
 - **Azure App Service** - Backend hosting
@@ -480,13 +486,66 @@ Content-Type: application/json
 - `403 Forbidden` - User doesn't have permission
 - `404 Not Found` - Resource not found
 
+## 🧪 Testing
+
+### Unit & Integration Tests
+
+Located in `StayEaseApp.Tests`, covering Domain, Application and Infrastructure layers.
+
+cd backend dotnet test tests/StayEaseApp.Tests
+
+### End-to-End (E2E) Tests
+
+Located in `StayEaseApp.E2ETests`, built with **Playwright** and **NUnit**, following the **Page Object Model** pattern.
+
+#### Prerequisites
+
+- The backend API and Angular frontend must be running locally (or pointed at a deployed environment).
+- Install Playwright browsers (first run only):
+cd backend/tests/StayEaseApp.E2ETests pwsh bin/Debug/net8.0/playwright.ps1 install
+
+#### Running the tests
+cd backend dotnet test tests/StayEaseApp.E2ETests
+
+#### Configuring the target environment
+
+Tests resolve the frontend and API URLs in this order:
+
+1. Environment variables: `TEST_BASEURL` and `TEST_APIURL` (used in CI).
+2. `.runsettings` parameters: `BaseUrl` and `ApiUrl` (for local overrides).
+3. Fallback defaults: `http://localhost:4200/` (frontend) and `https://localhost:7172` (API).
+
+#### Project structure
+StayEaseApp.E2ETests/ 
+├── Configuration/     
+├──── Environment resolution (TestEnvironment) 
+├── Infrastructure/     
+├──── Base classes: E2ETestBase (UI), ApiTestBase (API) 
+├── Pages/              
+├──── Page Object classes: BookingPageObject, HomePageObject, LoginPageObject, PropertiesPageObject, RegisterPageObject) 
+├── TestData/
+├──── Shared/reusable test data builders: TestUsers
+├── Test/
+├──── Test fixtures grouped by feature: (Authentication, Booking, Home)
+
+
+#### Test categories
+
+Tests are tagged with NUnit categories (e.g. `Smoke`, `Authentication`) so subsets can be run selectively:
+
+dotnet test tests/StayEaseApp.E2ETests --filter TestCategory=Smoke
+
+#### Failure diagnostics
+
+On test failure, Playwright automatically captures a **trace file** and a **full-page screenshot**, saved under `playwright-artifacts/` and attached to the NUnit test result for debugging.
+
 ## 🗄️ Database Schema
 
 <img src="./StayEaseApp-Database Schema.png" width="800"/>
 
 ## 🌐 Deployment
 
-### Production URLs (not yet)
+### Production URLs 
 - **Backend API**: https://stayease-webapp-shg-gjdve9gcghgwbqc7.westeurope-01.azurewebsites.net
 - **Frontend**: https://salmon-water-06fe6a403.7.azurestaticapps.net
 
@@ -494,7 +553,7 @@ Content-Type: application/json
 - Backend: Azure App Service (West Europe)
 - Frontend: Azure Static Web Apps
 - Database: Azure SQL Database
-- CI/CD: GitHub Actions
+- CI/CD: Azure DevOps Pipelines for automated deployment
 
 ## 🤝 Contributing
 
@@ -512,7 +571,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 👥 Team
 
-Developed by Saily Hurtado Gracia
+Developed by Saily Hurtado Gracia (sailyhurtado@gmail.com)
 
 ## 📧 Contact
 
@@ -522,4 +581,4 @@ Developed by Saily Hurtado Gracia
 ---
 
 **Main Branch** - Stable Production Release  
-**Last Updated**: May 2026
+**Last Updated**: August 2026
