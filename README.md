@@ -516,17 +516,17 @@ Tests resolve the frontend and API URLs in this order:
 3. Fallback defaults: `http://localhost:4200/` (frontend) and `https://localhost:7172` (API).
 
 #### Project structure
-StayEaseApp.E2ETests/ 
-├── Configuration/     
-├──── Environment resolution (TestEnvironment) 
-├── Infrastructure/     
-├──── Base classes: E2ETestBase (UI), ApiTestBase (API) 
-├── Pages/              
-├──── Page Object classes: BookingPageObject, HomePageObject, LoginPageObject, PropertiesPageObject, RegisterPageObject) 
-├── TestData/
-├──── Shared/reusable test data builders: TestUsers
-├── Test/
-├──── Test fixtures grouped by feature: (Authentication, Booking, Home)
+StayEaseApp.E2ETests/  <br>
+├── Configuration/ <br>    
+├──── Environment resolution (TestEnvironment) <br>
+├── Infrastructure/     <br>
+├──── Base classes: E2ETestBase (UI), ApiTestBase (API) <br>
+├── Pages/              <br>
+├──── Page Object classes: BookingPageObject, HomePageObject, LoginPageObject, PropertiesPageObject, RegisterPageObject) <br>
+├── TestData/ <br>
+├──── Shared/reusable test data builders: TestUsers <br>
+├── Test/ <br>
+├──── Test fixtures grouped by feature: (Authentication, Booking, Home) <br>
 
 
 #### Test categories
