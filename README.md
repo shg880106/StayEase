@@ -517,7 +517,7 @@ Tests resolve the frontend and API URLs in this order:
 
 #### Project structure
 StayEaseApp.E2ETests/  <br>
-├── Configuration/ <br>    
+├── Configuration/    
 ├──── Environment resolution (TestEnvironment) <br>
 ├── Infrastructure/     <br>
 ├──── Base classes: E2ETestBase (UI), ApiTestBase (API) <br>
